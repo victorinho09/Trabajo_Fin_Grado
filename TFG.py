@@ -14,6 +14,7 @@ from ucimlrepo import fetch_ucirepo
 
 
 
+
 data_iris = fetch_ucirepo(id=53).data #clasificacion
 data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
 data_adult = fetch_ucirepo(id=2).data #clasificacion
