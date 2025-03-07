@@ -3,16 +3,13 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 import math
-from tensorflow.keras.callbacks import Callback
-from sklearn.datasets import load_iris
+
+from keras import Sequential, Input
+from keras.src.callbacks import Callback
+from keras.src.layers import Dense
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Input
-from tensorflow.keras.callbacks import TensorBoard
 from sklearn.impute import SimpleImputer
-
-import datetime
 from ucimlrepo import fetch_ucirepo
 
 
@@ -389,10 +386,6 @@ train_and_evaluate(data_spambase,500, "logs/fit/spambase/500batches",16)
 train_and_evaluate(data_magic_gamma_telescope,500, "logs/fit/magic_gamma_telescope/500batches",16)
 train_and_evaluate(data_car_evaluation,500, "logs/fit/car_evaluation/500batches",16)
 train_and_evaluate(data_census_income,500, "logs/fit/census_income/500batches",16)
-#train_and_evaluate(data_communities_and_crime,500, "logs/fit/communities_and_crime/500batches",16)
-#train_and_evaluate(data_real_estate_valuation,500, "logs/fit/real_estate_valuation/500batches",16)
-#train_and_evaluate(data_parkinsons_telemonitoring,500, "logs/fit/parkinsons_telemonitoring/500batches",16)
-#train_and_evaluate(data_phiusiil_phishing_url_website,500, "logs/fit/phiusiil_phishing_url_website/500batches",16)
 
 # %load_ext tensorboard
 # %tensorboard --logdir logs/fit
