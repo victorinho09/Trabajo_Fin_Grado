@@ -1,8 +1,14 @@
+import math
+import tensorflow as tf
 import pandas as pd
 import numpy as np
+from keras import Sequential, Input
+from keras.src.layers import Dense
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+from EpochCumulativeLogger import EpochCumulativeLogger
 
 
 def get_y_target_col(data_obj):
@@ -37,7 +43,7 @@ def get_y_target_col(data_obj):
         return y[['target']]
 
 
-def preprocessData(data):
+def preprocess_data(data):
 
     X = pd.DataFrame(data.features, columns=data.feature_names)
     y = get_y_target_col(data)
@@ -140,3 +146,93 @@ def preprocessData(data):
     print("¿Hay NaN en X_train_final?", np.isnan(X_train_final).any())
 
     return X_train_final, X_test_final, y_train_encoded, y_test_encoded
+
+
+def train_and_evaluate(dataset, num_batches, log_dir, batch_size):
+    X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_data(dataset)
+    model = create_model(X_train_scaled, y_train_encoded)
+
+    tb_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=log_dir,
+        histogram_freq=1,
+        update_freq='epoch'
+    )
+
+    # global_batch_logger = GlobalBatchLogger(log_dir)
+    global_epoch_logger = EpochCumulativeLogger(log_dir)
+
+    # steps_per_epoch = compute_steps_for_batches(num_batches,X_train_scaled,batch_size)
+    numEpochs = getNumEpochsTrain(batch_size, X_train_scaled, num_batches)
+
+    history = model.fit(
+        X_train_scaled,
+        y_train_encoded,
+        validation_data=(X_test_scaled, y_test_encoded),
+        epochs=numEpochs,
+        batch_size=batch_size,
+        verbose=0,
+        callbacks=[tb_callback, global_epoch_logger]
+    )
+    loss, accuracy = model.evaluate(X_test_scaled, y_test_encoded)
+    print(f"Pérdida: {loss:.4f}, Precisión: {accuracy:.4f}")
+    return history
+
+
+# Creation of the ANN of example to try out the batch metrics in TensorBoard
+def create_model(X_train, y_train):
+    print("y_train_shape: ", y_train.shape[1])
+    model = Sequential([
+        Input(shape=(X_train.shape[1],)),
+        Dense(64, activation='relu',),  # Hidden Layer 1
+        Dense(32, activation='relu'),  # Hidden Layer 2
+        Dense(y_train.shape[1], activation='softmax')  # Output Layer with softmax for multiclass clasification
+    ])
+
+    # Compiling the model
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[
+        'accuracy'])  # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+
+    return model
+
+
+# Esta función te da el numero de epocas que se ejecutaran si quieres que se ejecuten un numero de batches concreto.
+# No es un numero de epocas exacto, ya que redondeamos hacia arriba. 3,1 epochs -> 4 epochs
+def getNumEpochsTrain(batch_size, X_train_scaled, desired_batches):
+    total_samples = X_train_scaled.shape[0]
+    # si 1 epoca es una vuelta entera a todos los samples. Y cada batch ejecuta batch_size instancias
+    numBatchesPorEpoch = math.ceil(total_samples / batch_size)
+    if (numBatchesPorEpoch > desired_batches):
+        print(
+            "No se llega a ejecutar 1 epoca entera --> numEpochs = 0????")  # preguntar: ¿Queremos comparar ejecuciones con las epochs?
+    numEpochs = math.ceil(desired_batches / numBatchesPorEpoch)
+    return numEpochs
+
+
+
+def compute_steps_for_batches(
+    desired_batches,
+    X_train_scaled,
+    batch_size=16
+):
+    """
+    Dado un número deseado de batches (desired_batches), calcula
+    el número de steps que se pueden entrenar, sin pasarse
+    del total de batches en X_train_scaled.
+    - desired_batches: cuántos batches queremos.
+    - X_train_scaled: datos de entrenamiento.
+    - batch_size: tamaño de lote.
+
+    Retorna steps_for_n_batches, que es el mínimo entre desired_batches y
+    la cantidad real de batches que hay.
+    """
+    total_samples = X_train_scaled.shape[0]
+    total_batches = math.ceil(total_samples / batch_size)
+
+    # Para no pasarnos de la época, usamos el mínimo
+    steps_for_n_batches = min(desired_batches, total_batches)
+
+    # También puedes forzar que sea al menos 1
+    if steps_for_n_batches < 1:
+        steps_for_n_batches = 1
+
+    return steps_for_n_batches

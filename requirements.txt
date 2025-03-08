@@ -1,9 +1,6 @@
-pip install tensorflow
-pip install scikit-learn
-pip install ucimlrepo
-pip install keras
 numpy~=2.0.2
 pandas~=2.2.3
 tensorflow~=2.18.0
 scikit-learn~=1.6.1
 ucimlrepo~=0.0.7
+keras~=3.9.0
