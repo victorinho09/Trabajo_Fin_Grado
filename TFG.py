@@ -1,176 +1,47 @@
-#Imports
-import numpy as np
-import pandas as pd
+
 import tensorflow as tf
 import math
-
 from keras import Sequential, Input
 from keras.src.callbacks import Callback
 from keras.src.layers import Dense
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from sklearn.impute import SimpleImputer
 from ucimlrepo import fetch_ucirepo
 
-
-
+from funciones import preprocessData
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
+print("Iris dataset cargado")
 data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
+print("Heart_disease dataset cargado")
 data_adult = fetch_ucirepo(id=2).data #clasificacion
+print("Adult dataset cargado")
 data_breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17).data #clasificacion
+print("Breast_cancer dataset cargado")
 data_bank_marketing = fetch_ucirepo(id=222).data #clasificacion
+print("Bank_marketing dataset cargado")
 data_diabetes = fetch_ucirepo(id=296).data #clasificacion
+print("Diabetes dataset cargado")
 data_mushroom = fetch_ucirepo(id=73).data #clasificacion
+print("Mushroom dataset cargado")
 data_default_payment = fetch_ucirepo(id=350).data #clasificacion
+print("Default_payment dataset cargado")
 data_car_evaluation = fetch_ucirepo(id=19).data #clasificacion
+print("Car_evaluation dataset cargado")
 data_dry_bean = fetch_ucirepo(id=602).data #clasificacion
+print("Dry_bean dataset cargado")
 data_magic_gamma_telescope = fetch_ucirepo(id=159).data #clasificacion
+print("Magic_gamma_telescope dataset cargado")
 data_spambase = fetch_ucirepo(id=94).data #clasificacion
+print("Spambase dataset cargado")
 data_census_income = fetch_ucirepo(id=20).data #clasificacion
-#data_phiusiil_phishing_url_website = fetch_ucirepo(id=967).data #clasificacion. --> NO CABE EN RAM, DA ERROR
+print("Census_income dataset cargado")
 
-#data_bike_sharing = fetch_ucirepo(id=275).data #regresion --> Este dataset funciona muy mal. ¿Mejorará con otra arquitectura?
-#data_real_estate_valuation = fetch_ucirepo(id=477).data #regresion --> Problema: Demasiado numero de clases objetivo, y muy pocas instancias, por lo que no da suficiente para que stratify funcione en testset, no consigue meter instancias en train y test set de igual manera
-#data_communities_and_crime = fetch_ucirepo(id=183).data #regresion --> Funciona muy mal tmb, muchas clases objetivo
-
-#data_parkinsons_telemonitoring = fetch_ucirepo(id=189).data #regresion -->No coge datos, no contiene nada
-
-
-def get_y_target_col(data_obj):
-    """
-    Dado data_obj = fetch_ucirepo(id=...).data, localiza la columna
-    de 'targets' y la renombra a 'target'.
-    Maneja varios casos:
-     - Ya se llama 'target'
-     - Se llama 'class'
-     - Solo hay una columna en data.targets (la renombra a 'target')
-    Devuelve un DataFrame con una sola columna llamada 'target'.
-    """
-    df_targets = data_obj.targets
-    cols = list(df_targets.columns)
-
-    # CASO 1: Si ya existe 'target'
-    if 'target' in cols:
-        y = df_targets[['target']].copy()
-        print("Numero cols en y:", y.columns)
-        return y
-
-    # CASO 2: Si existe 'class'
-    if 'class' in cols:
-        y = df_targets[['class']].rename(columns={'class': 'target'})
-        print("Numero cols en y:", y.columns)
-        return y
-
-    # CASO 3: Si solo hay 1 columna, la renombramos
-    if len(cols) == 1:
-        old_col = cols[0]
-        y = df_targets.rename(columns={old_col: 'target'})
-        return y[['target']]
-
-def preprocessData(data):
-
-    X = pd.DataFrame(data.features, columns=data.feature_names)
-    y = get_y_target_col(data)
-
-    #Elimino las filas que contienen que pertenecen a una clase con menos de 2 instancias en todo el dataset,
-    #porque sino stratify falla, al no poder balancear la aparición de clases en ambos sets al splittear
-    counts = y['target'].value_counts()
-    rare_classes = counts[counts < 2].index
-    mask = ~y['target'].isin(rare_classes)
-    X = X[mask].reset_index(drop=True)
-    y = y[mask].reset_index(drop=True)
-
-    #Filtrar filas donde y['target'] sea NaN
-    #(esto crea una máscara True/False, y solo conservas las True)
-    mask_not_nan = ~y['target'].isna()
-    X = X[mask_not_nan].reset_index(drop=True)
-    y = y[mask_not_nan].reset_index(drop=True)
-
-    #Train/Test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y #Hace falta stratify porque hay algún dataset (bike_sharing)
-        #que contiene muchas clases objetivo y provoca que no esté balanceado el train y el test set.
-    )
-
-    #print(y_train.info())
-    print("y_train count values:", y_train['target'].nunique())
-    print("y_train values:", y_train['target'].unique())
-    #print(y_train.head(30))
-
-    '''
-    print("X_train shape antes de imputer:", X_train.shape)
-    print("¿NaNs en X_train?", X_train.isna().sum())
-    '''
-
-    # 4) One-Hot Encoding para y
-    encoder = OneHotEncoder(sparse_output=False)
-    y_train_encoded = encoder.fit_transform(y_train['target'].values.reshape(-1, 1))
-    y_test_encoded  = encoder.transform(y_test['target'].values.reshape(-1, 1))
-    #print("y_test_encoded: ", y_test_encoded[1])
-    #print("size_y_test_encoded ", len(y_train_encoded[1]))
-
-    # 5) Separar columnas numéricas y categóricas
-    numeric_cols_train = X_train.select_dtypes(include=np.number).columns
-    categorical_cols_train = X_train.select_dtypes(exclude=np.number).columns
-
-    if len(numeric_cols_train) == 0 and len(categorical_cols_train) == 0:
-      raise ValueError("No hay columnas numéricas ni categóricas en X_train")
-
-    numeric_cols_test = X_test.select_dtypes(include=np.number).columns
-    categorical_cols_test = X_test.select_dtypes(exclude=np.number).columns
-
-    if len(numeric_cols_test) == 0 and len(categorical_cols_test) == 0:
-      raise ValueError("No hay columnas numéricas ni categóricas en X_test")
-
-    if(len(categorical_cols_train) == 0):
-        print("NO hay columnas categoricas en X_train")
-
-    # Imputar numéricas
-    imputer_num = SimpleImputer(strategy='mean')
-    if len(numeric_cols_train) > 0:
-      X_train_num_imputed = imputer_num.fit_transform(X_train[numeric_cols_train])
-      X_test_num_imputed  = imputer_num.transform(X_test[numeric_cols_test])
-
-      # Escalar numéricas
-      scaler = StandardScaler()
-      X_train_num_scaled = scaler.fit_transform(X_train_num_imputed)
-      X_test_num_scaled  = scaler.transform(X_test_num_imputed)
-
-    else:
-      X_train_num_scaled = np.zeros((X_train.shape[0], 0))
-      X_test_num_scaled  = np.zeros((X_test.shape[0], 0))
-
-
-    # Imputar categóricas
-    imputer_cat = SimpleImputer(strategy='most_frequent')
-    if len(categorical_cols_train) > 0:
-      X_train_cat_imputed = imputer_cat.fit_transform(X_train[categorical_cols_train])
-      X_test_cat_imputed  = imputer_cat.transform(X_test[categorical_cols_test])
-    else:
-      X_train_cat_imputed = np.zeros((X_train.shape[0], 0))
-      X_test_cat_imputed  = np.zeros((X_test.shape[0], 0))
-
-    # Codificar categóricas
-
-    if(len(categorical_cols_train) != 0):
-        print("Hay columnas categoricas en X_train")
-        ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-        X_train_cat_encoded = ohe.fit_transform(X_train_cat_imputed)
-        X_test_cat_encoded  = ohe.transform(X_test_cat_imputed)
-
-    else:
-        X_train_cat_encoded = np.zeros((X_train.shape[0], 0))
-        X_test_cat_encoded  = np.zeros((X_test.shape[0], 0))
-
-    # Concatenar numéricas escaladas + categóricas codificadas
-    X_train_final = np.concatenate([X_train_num_scaled, X_train_cat_encoded], axis=1)
-    X_test_final  = np.concatenate([X_test_num_scaled, X_test_cat_encoded],  axis=1)
-
-    # Revisar si hay NaN en la salida final
-    print("¿Hay NaN en X_train_final?", np.isnan(X_train_final).any())
-
-    return X_train_final, X_test_final, y_train_encoded, y_test_encoded
+'''
+data_phiusiil_phishing_url_website = fetch_ucirepo(id=967).data #clasificacion. --> NO CABE EN RAM, DA ERROR
+data_bike_sharing = fetch_ucirepo(id=275).data #regresion --> Este dataset funciona muy mal. ¿Mejorará con otra arquitectura?
+data_real_estate_valuation = fetch_ucirepo(id=477).data #regresion --> Problema: Demasiado numero de clases objetivo, y muy pocas instancias, por lo que no da suficiente para que stratify funcione en testset, no consigue meter instancias en train y test set de igual manera
+data_communities_and_crime = fetch_ucirepo(id=183).data #regresion --> Funciona muy mal tmb, muchas clases objetivo
+data_parkinsons_telemonitoring = fetch_ucirepo(id=189).data #regresion -->No coge datos, no contiene nada
+'''
 
 #numero de neuronas rango (capa inicial) : raiz del numero de features - numero de features
 #numero capas:
@@ -181,7 +52,7 @@ def create_model(X_train, y_train):
     print("y_train_shape: ", y_train.shape[1])
     model = Sequential([
         Input(shape=(X_train.shape[1],)),
-        Dense(64, activation='relu', input_shape=(X_train.shape[1],)),  # Hidden Layer 1
+        Dense(64, activation='relu',),  # Hidden Layer 1
         Dense(32, activation='relu'),  # Hidden Layer 2
         Dense(y_train.shape[1], activation='softmax')  # Output Layer with softmax for multiclass clasification
     ])
@@ -388,5 +259,5 @@ train_and_evaluate(data_magic_gamma_telescope,500, "logs/fit/magic_gamma_telesco
 train_and_evaluate(data_car_evaluation,500, "logs/fit/car_evaluation/500batches",16)
 train_and_evaluate(data_census_income,500, "logs/fit/census_income/500batches",16)
 
-# %load_ext tensorboard
-# %tensorboard --logdir logs/fit
+
+# %tensorboard --logdir logs/fit --port=6007
