@@ -162,7 +162,7 @@ def train_and_evaluate(dataset, num_batches, log_dir, batch_size):
     global_epoch_logger = EpochCumulativeLogger(log_dir)
 
     # steps_per_epoch = compute_steps_for_batches(num_batches,X_train_scaled,batch_size)
-    numEpochs = getNumEpochsTrain(batch_size, X_train_scaled, num_batches)
+    numEpochs = get_num_epochs_train(batch_size, X_train_scaled, num_batches)
 
     history = model.fit(
         X_train_scaled,
@@ -197,7 +197,7 @@ def create_model(X_train, y_train):
 
 # Esta función te da el numero de epocas que se ejecutaran si quieres que se ejecuten un numero de batches concreto.
 # No es un numero de epocas exacto, ya que redondeamos hacia arriba. 3,1 epochs -> 4 epochs
-def getNumEpochsTrain(batch_size, X_train_scaled, desired_batches):
+def get_num_epochs_train(batch_size, X_train_scaled, desired_batches):
     total_samples = X_train_scaled.shape[0]
     # si 1 epoca es una vuelta entera a todos los samples. Y cada batch ejecuta batch_size instancias
     numBatchesPorEpoch = math.ceil(total_samples / batch_size)
