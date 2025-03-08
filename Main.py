@@ -1,8 +1,6 @@
-import tensorflow as tf
-import math
-from keras.src.callbacks import Callback
+
 from ucimlrepo import fetch_ucirepo
-from funciones import preprocess_data, create_model, train_and_evaluate
+from funciones import train_and_evaluate
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
 print("Iris dataset cargado")
@@ -51,7 +49,6 @@ train_and_evaluate(data_diabetes,500, "logs/fit/diabetes/500batches",16)
 train_and_evaluate(data_adult,500, "logs/fit/adult/500batches",16)
 train_and_evaluate(data_mushroom,500, "logs/fit/mushroom/500batches",16)
 train_and_evaluate(data_default_payment,500, "logs/fit/default_payment/500batches",16)
-#train_and_evaluate(data_bike_sharing,500, "logs/fit/bike_sharing/500batches",16)
 train_and_evaluate(data_dry_bean,500, "logs/fit/dry_bean/500batches",16)
 train_and_evaluate(data_spambase,500, "logs/fit/spambase/500batches",16)
 train_and_evaluate(data_magic_gamma_telescope,500, "logs/fit/magic_gamma_telescope/500batches",16)
