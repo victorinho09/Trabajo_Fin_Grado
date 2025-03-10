@@ -12,6 +12,9 @@ class GlobalBatchLogger(Callback):
         self.cumulative_accuracy = 0.0
         self.total_samples = 0  # para saber cuántas muestras se han procesado
 
+        self.batch_loss_acum = []
+        self.batch_accuracy_acum = []
+
     def on_train_begin(self, logs=None):
         # Creamos el escritor de resúmenes de TensorFlow al inicio del entrenamiento
         self.writer = tf.summary.create_file_writer(self.log_dir)
@@ -47,6 +50,11 @@ class GlobalBatchLogger(Callback):
             # Registramos exclusivamente la métrica acumulada
             tf.summary.scalar('cumulative_loss', data=avg_cumulative_loss, step=self.global_step)
             tf.summary.scalar('cumulative_accuracy', data=avg_cumulative_accuracy, step=self.global_step)
+
+            # Guardamos en memoria los valores de precisión y loss acumulado hasta ese batch
+            self.batch_loss_acum.append(avg_cumulative_loss)
+            self.batch_accuracy_acum.append((avg_cumulative_accuracy))
+
 
         # Forzamos la escritura en los ficheros de logs
         self.writer.flush()

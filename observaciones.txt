@@ -1,0 +1,4 @@
+EpochCumulativeLogger cuestión arriba en comentario
+
+He hecho la aproximacion de calcular el numero de epocas al que se traduce el numero de batches que se desea entrenar,
+¿ESO ES VÁLIDO?
