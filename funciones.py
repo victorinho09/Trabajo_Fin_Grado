@@ -62,7 +62,12 @@ def create_model(X_train, y_train):
 
 # Esta función te da el numero de epocas que se ejecutaran si quieres que se ejecuten un numero de batches concreto.
 # No es un numero de epocas exacto, ya que redondeamos hacia arriba. 3,1 epochs -> 4 epochs
-def get_num_epochs_train(batch_size, X_train_scaled, desired_batches, validation_split_value):
+def get_num_epochs_train(
+        batch_size,
+        X_train_scaled,
+        desired_batches,
+        validation_split_value
+):
     total_samples =  (1-validation_split_value) * X_train_scaled.shape[0]
     # si 1 epoca es una vuelta entera a todos los samples. Y cada batch ejecuta batch_size instancias
     num_batches_per_epoch = math.ceil(total_samples / batch_size)
