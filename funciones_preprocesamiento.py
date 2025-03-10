@@ -12,7 +12,7 @@ def preprocess_data(data):
     X = pd.DataFrame(data.features, columns=data.feature_names)
     y = get_y_target_col(data)
 
-    #Elimino las filas que contienen que pertenecen a una clase con menos de 2 instancias en todo el dataset,
+    #Elimino las filas que contienen que pertenecen a una clase con menos de 2 instancias en el dataset
     #porque sino stratify falla, al no poder balancear la aparición de clases en ambos sets al splittear
     counts = y['target'].value_counts()
     rare_classes = counts[counts < 2].index
