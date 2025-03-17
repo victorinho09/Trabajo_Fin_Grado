@@ -42,24 +42,6 @@ def get_y_target_col(data_obj):
         y = df_targets.rename(columns={old_col: 'target'})
         return y[['target']]
 
-
-# Creation of the ANN of example to try out the batch metrics in TensorBoard
-def create_model(X_train, y_train):
-    print("y_train_shape: ", y_train.shape[1])
-    model = Sequential([
-        Input(shape=(X_train.shape[1],)),
-        Dense(64, activation='relu',),  # Hidden Layer 1
-        Dense(32, activation='relu'),  # Hidden Layer 2
-        Dense(y_train.shape[1], activation='softmax')  # Output Layer with softmax for multiclass clasification
-    ])
-
-    # Compiling the model
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=[
-        'accuracy'])  # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-
-    return model
-
-
 # Esta función te da el numero de epocas que se ejecutaran si quieres que se ejecuten un numero de batches concreto.
 # No es un numero de epocas exacto, ya que redondeamos hacia arriba. 3,1 epochs -> 4 epochs
 def get_num_epochs_train(
