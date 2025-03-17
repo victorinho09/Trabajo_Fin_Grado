@@ -5,9 +5,9 @@ from entrenamiento import train_and_evaluate
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
 print("Iris dataset cargado")
+'''
 data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
 print("Heart_disease dataset cargado")
-'''
 data_adult = fetch_ucirepo(id=2).data #clasificacion
 print("Adult dataset cargado")
 data_breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17).data #clasificacion

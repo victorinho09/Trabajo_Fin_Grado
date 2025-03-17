@@ -1,12 +1,14 @@
 import tensorflow as tf
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
+from Model import Model
 from funciones import create_model, get_num_epochs_train, dividir_array
 from funciones_preprocesamiento import preprocess_data
 
 
 def train_and_evaluate(dataset, num_batches, log_dir, batch_size):
     X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_data(dataset)
+    #model = Model(X_train_scaled, y_train_encoded)
     model = create_model(X_train_scaled, y_train_encoded)
 
     tb_callback = tf.keras.callbacks.TensorBoard(
@@ -55,12 +57,13 @@ def train_and_evaluate(dataset, num_batches, log_dir, batch_size):
     #print("metric_loss_per_batch: ", metric_loss_per_batch)
     #print("metric_accuracy_per_batch",metric_accuracy_per_batch)
 
+
     metricas = []
 
     for epoch in range(num_epochs):
         info_epoch = [ metric_accuracy_per_batch[epoch], metric_loss_per_batch[epoch], metric_val_accuracy[epoch], metric_val_loss[epoch] ]
         metricas.append(info_epoch)
-        #print(info_epoch)
+        print(info_epoch)
         #print(epoch)
 
 

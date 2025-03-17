@@ -1,9 +1,6 @@
 import tensorflow as tf
 from keras.src.callbacks import Callback
 
-#NO TIENE SENTIDO LA PERDIDA ACUMULADA POR EPOCA NO? YA QUE SE ACTUALIZAN LOS PESOS DESPUES DE CADA EPOCA
-#CON LOS BATCHES ES DISTINTO, YA QUE NO SE ACTUALIZA TRAS CADA UNO
-
 # Con esta callback, registramos la perdida y precisión acumulada tras cada época.
 class EpochCumulativeLogger(Callback):
     def __init__(self, log_dir):
