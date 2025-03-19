@@ -4,6 +4,7 @@ from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
 
+
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array
@@ -29,7 +30,7 @@ class  Model():
         self.metrics = []
 
         random_search_tuner = kt.RandomSearch(
-            self.create_model, objective="accuracy", max_trials= 5, overwrite=True,
+            self.create_model_for_fine_tuning, objective="accuracy", max_trials= 5, overwrite=True,
             directory='directorio_pruebas_rndomsearch',project_name='mi_rndomsearch'
         )
         random_search_tuner.search(self.X_train,self.y_train, epochs=10)
@@ -38,7 +39,32 @@ class  Model():
         best_hyperparameters = best_model[0].values
         print("Mejores valores: ",best_hyperparameters)
 
-    def create_model(self,hp):
+        #Se asignan los nuevos valores a los atributos correspondientes para llamar al metodo fit con estos hiperparametros buenos
+        self.num_hidden_layers = best_hyperparameters['num_hidden'] #Con el print de arriba, se observa la estructura de best_hyperparameters,el cual es un dict
+        self.lr = best_hyperparameters['lr']
+
+        self.model = self.build_definitive_model()
+
+    def build_definitive_model(self):
+
+        model = Sequential()
+        model.add(Input(self.num_neurons_input_layer))
+
+        # Se añaden el resto de capas del modelo
+        for i in range(self.num_hidden_layers):
+            model.add(Dense(self.num_neurons_per_hidden[i], activation=self.hidden_activation_function[i]))
+
+        # Se añade capa de salida. La función de activación corresponde al último
+        model.add(Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
+
+        #Se vuelve a crear instancia de optimizador, ya que el anterior ya está modificado y no puede ser usado
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
+
+        # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
+        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
+        return model
+
+    def create_model_for_fine_tuning(self,hp):
 
         self.num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
         self.num_neurons_per_hidden = [64,32] #Array: 1º valor -> 1º capa ...
@@ -119,21 +145,3 @@ class  Model():
 
     def evaluate(self,X_test_scaled, y_test_encoded):
         self.model.evaluate(X_test_scaled, y_test_encoded)
-
-'''
-    def search_best_params(self):
-
-        param_dist = {
-            'num_dense_layers': self.num_dense_layers,
-            'lr': self.learning_rate,
-        }
-        random_search = RandomizedSearchCV(
-            estimator=self.model,
-            param_distributions= param_dist,
-            cv=2,
-            scoring="f1_macro"
-        )
-
-        random_search.fit(self.X_train,self.y_train)
-        print(random_search.best_params_)
-'''
