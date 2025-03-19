@@ -4,7 +4,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from funciones import get_y_target_col
+from funciones_auxiliares import get_y_target_col
 
 
 def preprocess_data(data):

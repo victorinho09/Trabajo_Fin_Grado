@@ -1,68 +1,58 @@
+import keras_tuner as kt
+import math
 from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
-from tensorflow.python.keras.saving.saved_model.serialized_attributes import metrics
+from sklearn.model_selection import RandomizedSearchCV
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
-from funciones import get_num_epochs_train, dividir_array
+from funciones_auxiliares import get_num_epochs_train, dividir_array
 
 
 class  Model():
     def __init__(self,X_train,y_train):
 
-        #Para ser usados luego en la estructura de la capa inicial, final y para el entrenamiento del modelo
-        self.X_train = X_train
+        self.X_train = X_train #Para ser usados luego en la estructura de la capa inicial, final y para el entrenamiento del modelo
         self.y_train = y_train
-
-        #No obtendrá valor hasta que se entrene el modelo
-        self.history = None
-
+        self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_epochs = None
         self.num_batches_per_epoch = None
-
-        self.model = Sequential()
-
-        #Se inicializan ciertas variables con valores por defecto, ya que no hay más referencias en la primera instancia
-
-        self.num_dense_layers = 2
-
-        #Array: 1º valor -> 1º capa ...
-        self.num_neurons_per_dense_layer = [64,32]
-
-        #Depende de la estructura de y_train
-        self.num_neurons_output_layer = y_train.shape[1]
-
-        #Depende de la estructura de X_train
-        self.num_neurons_input_layer = (X_train.shape[1],)
-
-        #De momento, se usa solo el optimizer
-        self.learning_rate = None
-        self.optimizer = 'adam'
-
-        self.loss = 'categorical_crossentropy'  # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-
-        #Array: 1º valor -> 1 capa oculta ...
-        self.dense_layers_activation_function = ['relu','relu']
-        self.output_layer_activation_function = 'softmax'
         self.metrics = []
 
-        self.create_model()
+        random_search_tuner = kt.RandomSearch(
+            self.create_model, objective="accuracy", max_trials= 5, overwrite=True,
+            directory='directorio_pruebas_rndomsearch',project_name='mi_rndomsearch'
+        )
+        random_search_tuner.search(self.X_train,self.y_train, epochs=10)
+        best_trial = random_search_tuner.oracle.get_best_trials()[0]
+        best_trial.summary()
 
+    def create_model(self,hp):
 
-    def create_model(self):
+        num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
+        num_neurons_per_hidden = [64,32] #Array: 1º valor -> 1º capa ...
+        lr = hp.Float("lr",min_value=1e-5,max_value=1e-2,sampling= 'log')
+        optimizer = tf.keras.optimizers.Adam(learning_rate = lr)
+        loss= 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+        hidden_activation_function = ['relu','relu'] #Array: 1º valor -> 1 capa oculta ...
+        output_activation_function = 'softmax'
+        num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
+        num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
 
-        self.model.add(Input(self.num_neurons_input_layer))
+        model = Sequential()
+        model.add(Input(num_neurons_input_layer))
 
         #Se añaden el resto de capas del modelo
-        for i,num_neurons_layer in enumerate(self.num_neurons_per_dense_layer):
-            self.model.add(Dense(num_neurons_layer, activation= self.dense_layers_activation_function[i]))
+        for i in range(num_hidden_layers):
+            model.add(Dense(num_neurons_per_hidden[i], activation= hidden_activation_function[i]))
 
         #Se añade capa de salida. La función de activación corresponde al último
-        self.model.add(Dense(self.num_neurons_output_layer, activation= self.output_layer_activation_function ))
+        model.add(Dense(num_neurons_output_layer, activation= output_activation_function ))
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
-        self.model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
+        model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+        return model
 
     def train(self,num_batches,batch_size,log_dir):
 
@@ -120,3 +110,20 @@ class  Model():
     def evaluate(self,X_test_scaled, y_test_encoded):
         self.model.evaluate(X_test_scaled, y_test_encoded)
 
+'''
+    def search_best_params(self):
+
+        param_dist = {
+            'num_dense_layers': self.num_dense_layers,
+            'lr': self.learning_rate,
+        }
+        random_search = RandomizedSearchCV(
+            estimator=self.model,
+            param_distributions= param_dist,
+            cv=2,
+            scoring="f1_macro"
+        )
+
+        random_search.fit(self.X_train,self.y_train)
+        print(random_search.best_params_)
+'''

@@ -4,3 +4,5 @@ tensorflow~=2.18.0
 scikit-learn~=1.6.1
 ucimlrepo~=0.0.7
 keras~=3.9.0
+keras-tuner~=1.4.7
+scikeras~=0.13.0
