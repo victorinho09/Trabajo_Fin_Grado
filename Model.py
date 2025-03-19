@@ -3,7 +3,6 @@ import math
 from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
-from sklearn.model_selection import RandomizedSearchCV
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -18,6 +17,15 @@ class  Model():
         self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_epochs = None
         self.num_batches_per_epoch = None
+        self.num_hidden_layers = None
+        self.num_neurons_per_hidden = None
+        self.lr = None
+        self.optimizer = None
+        self.loss = None
+        self.hidden_activation_function = None
+        self.output_activation_function = None
+        self.num_neurons_output_layer = None
+        self.num_neurons_input_layer = None
         self.metrics = []
 
         random_search_tuner = kt.RandomSearch(
@@ -25,33 +33,35 @@ class  Model():
             directory='directorio_pruebas_rndomsearch',project_name='mi_rndomsearch'
         )
         random_search_tuner.search(self.X_train,self.y_train, epochs=10)
-        best_trial = random_search_tuner.oracle.get_best_trials()[0]
-        best_trial.summary()
+
+        best_model = random_search_tuner.get_best_hyperparameters(num_trials=1)
+        best_hyperparameters = best_model[0].values
+        print("Mejores valores: ",best_hyperparameters)
 
     def create_model(self,hp):
 
-        num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
-        num_neurons_per_hidden = [64,32] #Array: 1º valor -> 1º capa ...
-        lr = hp.Float("lr",min_value=1e-5,max_value=1e-2,sampling= 'log')
-        optimizer = tf.keras.optimizers.Adam(learning_rate = lr)
-        loss= 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-        hidden_activation_function = ['relu','relu'] #Array: 1º valor -> 1 capa oculta ...
-        output_activation_function = 'softmax'
-        num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
-        num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
+        self.num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
+        self.num_neurons_per_hidden = [64,32] #Array: 1º valor -> 1º capa ...
+        self.lr = hp.Float("lr",min_value=1e-5,max_value=1e-2,sampling= 'log')
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
+        self.loss= 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+        self.hidden_activation_function = ['relu','relu'] #Array: 1º valor -> 1 capa oculta ...
+        self.output_activation_function = 'softmax'
+        self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
+        self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
 
         model = Sequential()
-        model.add(Input(num_neurons_input_layer))
+        model.add(Input(self.num_neurons_input_layer))
 
         #Se añaden el resto de capas del modelo
-        for i in range(num_hidden_layers):
-            model.add(Dense(num_neurons_per_hidden[i], activation= hidden_activation_function[i]))
+        for i in range(self.num_hidden_layers):
+            model.add(Dense(self.num_neurons_per_hidden[i], activation= self.hidden_activation_function[i]))
 
         #Se añade capa de salida. La función de activación corresponde al último
-        model.add(Dense(num_neurons_output_layer, activation= output_activation_function ))
+        model.add(Dense(self.num_neurons_output_layer, activation= self.output_activation_function ))
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
-        model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
         return model
 
     def train(self,num_batches,batch_size,log_dir):
