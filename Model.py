@@ -29,21 +29,31 @@ class  Model():
         self.output_activation_function = None
         self.num_neurons_output_layer = None
         self.num_neurons_input_layer = None
+        self.bayesian_opt_tuner = None
+        self.best_hyperparameters = None
         self.metrics = []
+        self.model = None
 
-        bayesian_opt_tuner = kt.BayesianOptimization(
-            self.create_model_for_fine_tuning, objective="accuracy", max_trials= 5, overwrite=True,
-            directory='directorio_pruebas_rndomsearch',project_name='mi_rndomsearch'
+    def create_bayesian_opt_tuner(self):
+        self.bayesian_opt_tuner = kt.BayesianOptimization(
+            self.create_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
+            directory='directorio_pruebas_rndomsearch', project_name='mi_rndomsearch'
         )
-        bayesian_opt_tuner.search(self.X_train,self.y_train, epochs=10)
 
-        best_model = bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)
-        best_hyperparameters = best_model[0].values
-        print("Mejores valores: ",best_hyperparameters)
+    def search_bayesian_opt_tuner(self):
+        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=10)
+        self.get_best_hyperparams_from_bayesian_search()
+        self.assign_best_hyperparams_to_model()
 
-        #Se asignan los nuevos valores a los atributos correspondientes para llamar al metodo fit con estos hiperparametros buenos
-        self.num_hidden_layers = best_hyperparameters['num_hidden'] #Con el print de arriba, se observa la estructura de best_hyperparameters,el cual es un dict
-        self.lr = best_hyperparameters['lr']
+    def get_best_hyperparams_from_bayesian_search(self):
+        best_model = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)
+        self.best_hyperparameters = best_model[0].values
+        print("Mejores valores: ", self.best_hyperparameters)
+
+    def assign_best_hyperparams_to_model(self):
+        # Se asignan los nuevos valores a los atributos correspondientes para llamar al metodo fit con estos hiperparametros buenos
+        self.num_hidden_layers = self.best_hyperparameters['num_hidden']  # Con el print de arriba, se observa la estructura de best_hyperparameters,el cual es un dict
+        self.lr = self.best_hyperparameters['lr']
 
         self.model = self.build_definitive_model()
 
