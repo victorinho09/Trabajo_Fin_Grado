@@ -1,9 +1,11 @@
+from random import sample
+
 import keras_tuner as kt
 import math
 from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
-
+from numpy.ma.core import minimum_fill_value
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -29,13 +31,13 @@ class  Model():
         self.num_neurons_input_layer = None
         self.metrics = []
 
-        random_search_tuner = kt.RandomSearch(
+        bayesian_opt_tuner = kt.BayesianOptimization(
             self.create_model_for_fine_tuning, objective="accuracy", max_trials= 5, overwrite=True,
             directory='directorio_pruebas_rndomsearch',project_name='mi_rndomsearch'
         )
-        random_search_tuner.search(self.X_train,self.y_train, epochs=10)
+        bayesian_opt_tuner.search(self.X_train,self.y_train, epochs=10)
 
-        best_model = random_search_tuner.get_best_hyperparameters(num_trials=1)
+        best_model = bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)
         best_hyperparameters = best_model[0].values
         print("Mejores valores: ",best_hyperparameters)
 
@@ -52,7 +54,7 @@ class  Model():
 
         # Se añaden el resto de capas del modelo
         for i in range(self.num_hidden_layers):
-            model.add(Dense(self.num_neurons_per_hidden[i], activation=self.hidden_activation_function[i]))
+            model.add(Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function[i]))
 
         # Se añade capa de salida. La función de activación corresponde al último
         model.add(Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
@@ -67,7 +69,14 @@ class  Model():
     def create_model_for_fine_tuning(self,hp):
 
         self.num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
-        self.num_neurons_per_hidden = [64,32] #Array: 1º valor -> 1º capa ...
+        if self.X_train.shape[1] < 10:
+            self.num_neurons_per_hidden = 10 #SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
+        else:
+            if self.X_train.shape[1] > 100:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",min_value= 10, max_value = self.X_train.shape[1], sample='log') #Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+            else:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=10, max_value=self.X_train.shape[1])
+
         self.lr = hp.Float("lr",min_value=1e-5,max_value=1e-2,sampling= 'log')
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
         self.loss= 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
@@ -81,7 +90,7 @@ class  Model():
 
         #Se añaden el resto de capas del modelo
         for i in range(self.num_hidden_layers):
-            model.add(Dense(self.num_neurons_per_hidden[i], activation= self.hidden_activation_function[i]))
+            model.add(Dense(self.num_neurons_per_hidden, activation= self.hidden_activation_function[i]))
 
         #Se añade capa de salida. La función de activación corresponde al último
         model.add(Dense(self.num_neurons_output_layer, activation= self.output_activation_function ))
