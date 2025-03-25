@@ -1,11 +1,13 @@
 from random import sample
 
+import keras_tuner
 import keras_tuner as kt
 import math
 from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
 from numpy.ma.core import minimum_fill_value
+from tensorflow.python.ops.gen_tpu_ops import retrieve_tpu_embedding_frequency_estimator_parameters
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -29,33 +31,73 @@ class  Model():
         self.output_activation_function = None
         self.num_neurons_output_layer = None
         self.num_neurons_input_layer = None
-        self.bayesian_opt_tuner = None
+        self.bayesian_opt_tuner_primera_vuelta = None
+        self.bayesian_opt_tuner_segunda_vuelta = None
         self.best_hyperparameters = None
         self.metrics = []
         self.model = None
 
-    def create_bayesian_opt_tuner(self):
-        self.bayesian_opt_tuner = kt.BayesianOptimization(
-            self.create_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
-            directory='directorio_pruebas_rndomsearch', project_name='mi_rndomsearch'
+    def create_and_use_bayesian_opt_tuner(self):
+
+        ####PRIMERA VUELTA####
+        #Se deciden numero de capas ocultas y una primera aprox de lr
+        self.bayesian_opt_tuner_primera_vuelta = kt.BayesianOptimization(
+            self.create_first_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
+            directory='directorio_pruebas_bayesianTuner', project_name='Primer fine-tuning'
         )
 
-    def search_bayesian_opt_tuner(self):
-        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=10)
-        self.get_best_hyperparams_from_bayesian_search()
-        self.assign_best_hyperparams_to_model()
+        #deja en los atributos de la clase los resultados del fine tuning
+        self.search_bayesian_opt_tuner('1')
 
-    def get_best_hyperparams_from_bayesian_search(self):
-        best_model = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)
-        self.best_hyperparameters = best_model[0].values
-        print("Mejores valores: ", self.best_hyperparameters)
+        #asignamos resultados de la primera vuelta:
+        self.assign_num_hidden_layers_to_model()
+        self.assign_lr_to_model()
 
-    def assign_best_hyperparams_to_model(self):
-        # Se asignan los nuevos valores a los atributos correspondientes para llamar al metodo fit con estos hiperparametros buenos
-        self.num_hidden_layers = self.best_hyperparameters['num_hidden']  # Con el print de arriba, se observa la estructura de best_hyperparameters,el cual es un dict
+        ####SEGUNDA VUELTA###
+        #Se deciden numero de neuronas por capa y nueva aprox de lr
+
+        if self.X_train.shape[1] >= 10:
+
+            self.bayesian_opt_tuner_segunda_vuelta = kt.BayesianOptimization(
+                self.create_second_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
+                directory='directorio_pruebas_bayesianTuner', project_name='Segundo fine-tuning'
+            )
+
+            # deja en los atributos de la clase los resultados del fine tuning
+            self.search_bayesian_opt_tuner('2')
+
+            # asignamos resultados de la segunda vuelta:
+            self.assign_num_neurons_per_hidden_to_model()
+            #self.assign_lr_to_model()   Hay que ver como hacerlo
+        else:
+            self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
+
+        #al fin, se construye el modelo final
+        self.model = self.build_definitive_model()
+
+    def search_bayesian_opt_tuner(self,vuelta: str):
+
+        if vuelta == '1':
+            self.bayesian_opt_tuner_primera_vuelta.search(self.X_train, self.y_train, epochs=10)
+
+            #Se seleccionan los mejores hiperparametros encontrados
+            self.best_hyperparameters = self.bayesian_opt_tuner_primera_vuelta.get_best_hyperparameters(num_trials=1)[0].values
+
+        if vuelta == '2':
+
+            self.bayesian_opt_tuner_segunda_vuelta.search(self.X_train, self.y_train, epochs=10)
+
+            # Se seleccionan los mejores hiperparametros encontrados
+            self.best_hyperparameters = self.bayesian_opt_tuner_segunda_vuelta.get_best_hyperparameters(num_trials=1)[0].values
+
+    def assign_num_hidden_layers_to_model(self):
+        self.num_hidden_layers = self.best_hyperparameters['num_hidden']
+
+    def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']
 
-        self.model = self.build_definitive_model()
+    def assign_num_neurons_per_hidden_to_model(self):
+        self.num_neurons_per_hidden = self.best_hyperparameters['num_neurons_per_hidden']
 
     def build_definitive_model(self):
 
@@ -76,37 +118,57 @@ class  Model():
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
         return model
 
-    def create_model_for_fine_tuning(self,hp):
-
-        self.num_hidden_layers = hp.Int("num_hidden",min_value=2,max_value=math.sqrt(self.X_train.shape[1])) #Entre 2 - sqroot(nº features)
-        if self.X_train.shape[1] < 10:
-            self.num_neurons_per_hidden = 10 #SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
-        else:
-            if self.X_train.shape[1] > 100:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",min_value= 10, max_value = self.X_train.shape[1], sample='log') #Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
-            else:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=10, max_value=self.X_train.shape[1])
-
-        self.lr = hp.Float("lr",min_value=1e-5,max_value=1e-2,sampling= 'log')
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
-        self.loss= 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-        self.hidden_activation_function = ['relu','relu'] #Array: 1º valor -> 1 capa oculta ...
+    #se inicializan los hiperparámetros que son fijos, es decir, que no hay que hacer fine tuning de momento. Para organizar codigo en mas funciones
+    def initialize_fixed_hiperparameters(self):
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
+        self.loss = 'categorical_crossentropy'  # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+        self.hidden_activation_function = ['relu', 'relu']  # Array: 1º valor -> 1 capa oculta ...
         self.output_activation_function = 'softmax'
         self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
         self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
+        self.num_neurons_per_hidden = 10 #primero se halla numero de capas con este valor de neuronas por capa
 
+    def build_arquitecture_for_fine_tuning(self):
         model = Sequential()
         model.add(Input(self.num_neurons_input_layer))
 
-        #Se añaden el resto de capas del modelo
+        # Se añaden el resto de capas del modelo
         for i in range(self.num_hidden_layers):
-            model.add(Dense(self.num_neurons_per_hidden, activation= self.hidden_activation_function[i]))
+            model.add(Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function[i]))
 
-        #Se añade capa de salida. La función de activación corresponde al último
-        model.add(Dense(self.num_neurons_output_layer, activation= self.output_activation_function ))
+        # Se añade capa de salida. La función de activación corresponde al último
+        model.add(Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
+        return model
+
+    #se deciden numero num_neuronas_por_capa y lr otra vez
+    def create_second_model_for_fine_tuning(self,hp):
+        if self.X_train.shape[1] < 10:
+            self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
+        else:
+            if self.X_train.shape[1] > 100:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=10,max_value=self.X_train.shape[1],sample='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+            else:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=10,max_value=self.X_train.shape[1])
+
+        ########Hay que ver como hacer con la lr de nuevo
+        model = self.build_arquitecture_for_fine_tuning()
+        return model
+
+
+    #se deciden num_capas y primera aprox de lr
+    def create_first_model_for_fine_tuning(self,hp):
+
+        self.num_hidden_layers = hp.Int("num_hidden", min_value=2, max_value=math.ceil(math.sqrt(self.X_train.shape[1])))  # Entre 2 - sqroot(nº features)
+
+        self.lr = hp.Float("lr", min_value=1e-5, max_value=1e-2, sampling='log')
+
+        #En la primera vuelta hay que inicializar los hiperparámetros con los que no se hará fine-tuning
+        self.initialize_fixed_hiperparameters()
+
+        model = self.build_arquitecture_for_fine_tuning()
         return model
 
     def train(self,num_batches,batch_size,log_dir):
