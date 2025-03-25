@@ -27,9 +27,7 @@ class  Model():
         self.output_activation_function = None
         self.num_neurons_output_layer = None
         self.num_neurons_input_layer = None
-        self.bayesian_opt_tuner_primera_vuelta = None
-        self.bayesian_opt_tuner_segunda_vuelta = None
-        self.bayesian_opt_tuner_tercera_vuelta = None
+        self.bayesian_opt_tuner = None
         self.best_hyperparameters = None
         self.metrics = []
         self.model = None
@@ -39,13 +37,13 @@ class  Model():
         ####PRIMERA VUELTA####
         print("Entrada vuelta 1")
         #Se deciden numero de capas ocultas y una primera aprox de lr
-        self.bayesian_opt_tuner_primera_vuelta = kt.BayesianOptimization(
+        self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.create_first_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
             directory='directorio_pruebas_bayesianTuner', project_name='Primer fine-tuning'
         )
 
         #deja en los atributos de la clase los resultados del fine tuning
-        self.search_bayesian_opt_tuner('1')
+        self.search_bayesian_opt_tuner()
 
         #asignamos resultados de la primera vuelta:
         self.assign_num_hidden_layers_to_model()
@@ -57,13 +55,13 @@ class  Model():
 
         if self.X_train.shape[1] >= 10:
 
-            self.bayesian_opt_tuner_segunda_vuelta = kt.BayesianOptimization(
+            self.bayesian_opt_tuner = kt.BayesianOptimization(
                 self.create_second_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
                 directory='directorio_pruebas_bayesianTuner', project_name='Segundo fine-tuning'
             )
 
             # deja en los atributos de la clase los resultados del fine tuning
-            self.search_bayesian_opt_tuner('2')
+            self.search_bayesian_opt_tuner()
 
             # asignamos resultados de la segunda vuelta:
             self.assign_num_neurons_per_hidden_to_model()
@@ -74,13 +72,13 @@ class  Model():
 
         ####TERCERA VUELTA####
         print("Entrada vuelta 3")
-        self.bayesian_opt_tuner_tercera_vuelta = kt.BayesianOptimization(
+        self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.create_third_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
             directory='directorio_pruebas_bayesianTuner', project_name='Tercer fine-tuning'
         )
 
         # deja en los atributos de la clase los resultados del fine tuning
-        self.search_bayesian_opt_tuner('3')
+        self.search_bayesian_opt_tuner()
 
         # asignamos resultados de la primera vuelta:
         self.assign_optimizer_to_model()
@@ -88,28 +86,9 @@ class  Model():
         #al fin, se construye el modelo final
         self.model = self.build_definitive_model()
 
-    def search_bayesian_opt_tuner(self,vuelta: str):
-
-        if vuelta == '1':
-            self.bayesian_opt_tuner_primera_vuelta.search(self.X_train, self.y_train, epochs=10)
-
-            #Se seleccionan los mejores hiperparametros encontrados
-            self.best_hyperparameters = self.bayesian_opt_tuner_primera_vuelta.get_best_hyperparameters(num_trials=1)[0].values
-
-        if vuelta == '2':
-
-            self.bayesian_opt_tuner_segunda_vuelta.search(self.X_train, self.y_train, epochs=10)
-
-            # Se seleccionan los mejores hiperparametros encontrados
-            self.best_hyperparameters = self.bayesian_opt_tuner_segunda_vuelta.get_best_hyperparameters(num_trials=1)[0].values
-
-        if vuelta == "3":
-
-            self.bayesian_opt_tuner_tercera_vuelta.search(self.X_train, self.y_train, epochs = 10)
-
-            #Se seleccionan los mejores hiperparametros encontrados
-            self.best_hyperparameters = self.bayesian_opt_tuner_tercera_vuelta.get_best_hyperparameters(num_trials=1)[0].values
-
+    def search_bayesian_opt_tuner(self):
+            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=10)
+            self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
