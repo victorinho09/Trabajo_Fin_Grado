@@ -1,13 +1,9 @@
-from random import sample
-
-import keras_tuner
 import keras_tuner as kt
 import math
 from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
-from numpy.ma.core import minimum_fill_value
-from tensorflow.python.ops.gen_tpu_ops import retrieve_tpu_embedding_frequency_estimator_parameters
+from keras_tuner.src.backend import keras
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -33,6 +29,7 @@ class  Model():
         self.num_neurons_input_layer = None
         self.bayesian_opt_tuner_primera_vuelta = None
         self.bayesian_opt_tuner_segunda_vuelta = None
+        self.bayesian_opt_tuner_tercera_vuelta = None
         self.best_hyperparameters = None
         self.metrics = []
         self.model = None
@@ -40,6 +37,7 @@ class  Model():
     def create_and_use_bayesian_opt_tuner(self):
 
         ####PRIMERA VUELTA####
+        print("Entrada vuelta 1")
         #Se deciden numero de capas ocultas y una primera aprox de lr
         self.bayesian_opt_tuner_primera_vuelta = kt.BayesianOptimization(
             self.create_first_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
@@ -54,6 +52,7 @@ class  Model():
         self.assign_lr_to_model()
 
         ####SEGUNDA VUELTA###
+        print("Entrada vuelta 2")
         #Se deciden numero de neuronas por capa y nueva aprox de lr
 
         if self.X_train.shape[1] >= 10:
@@ -71,6 +70,20 @@ class  Model():
             #self.assign_lr_to_model()   Hay que ver como hacerlo
         else:
             self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
+
+
+        ####TERCERA VUELTA####
+        print("Entrada vuelta 3")
+        self.bayesian_opt_tuner_tercera_vuelta = kt.BayesianOptimization(
+            self.create_third_model_for_fine_tuning, objective="accuracy", max_trials=5, overwrite=True,
+            directory='directorio_pruebas_bayesianTuner', project_name='Tercer fine-tuning'
+        )
+
+        # deja en los atributos de la clase los resultados del fine tuning
+        self.search_bayesian_opt_tuner('3')
+
+        # asignamos resultados de la primera vuelta:
+        self.assign_optimizer_to_model()
 
         #al fin, se construye el modelo final
         self.model = self.build_definitive_model()
@@ -90,11 +103,22 @@ class  Model():
             # Se seleccionan los mejores hiperparametros encontrados
             self.best_hyperparameters = self.bayesian_opt_tuner_segunda_vuelta.get_best_hyperparameters(num_trials=1)[0].values
 
+        if vuelta == "3":
+
+            self.bayesian_opt_tuner_tercera_vuelta.search(self.X_train, self.y_train, epochs = 10)
+
+            #Se seleccionan los mejores hiperparametros encontrados
+            self.best_hyperparameters = self.bayesian_opt_tuner_tercera_vuelta.get_best_hyperparameters(num_trials=1)[0].values
+
+
     def assign_num_hidden_layers_to_model(self):
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
 
     def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']
+
+    def assign_optimizer_to_model(self):
+        self.optimizer = self.best_hyperparameters['optimizer']
 
     def assign_num_neurons_per_hidden_to_model(self):
         self.num_neurons_per_hidden = self.best_hyperparameters['num_neurons_per_hidden']
@@ -141,6 +165,23 @@ class  Model():
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
+        return model
+
+    #Se decide optimizador
+    def create_third_model_for_fine_tuning(self,hp):
+
+        optimizerChoice = hp.Choice("optimizer",['adam', 'rmsprop', 'adamax'])
+        #también se reentrena lr, ya que salia aviso de que si se exploraban mas valores (menores de 1e-5) podia ir mejor
+        lr = hp.Float("lr",min_value= (self.lr / 100), max_value= (self.lr * 100))
+
+        if optimizerChoice == 'adam':
+            self.optimizer = keras.optimizers.Adam(learning_rate=lr)
+        if optimizerChoice == "rmsprop":
+            self.optimizer = keras.optimizers.RMSprop(learning_rate=lr)
+        if optimizerChoice == "adamax":
+            self.optimizer = keras.optimizers.Adamax(learning_rate=lr)
+
+        model = self.build_arquitecture_for_fine_tuning()
         return model
 
     #se deciden numero num_neuronas_por_capa y lr otra vez

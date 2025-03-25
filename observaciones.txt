@@ -1,5 +1,6 @@
 --NO PRIORITARIO :He hecho la aproximacion de calcular el numero de epocas al que se traduce el numero de batches que se desea entrenar,
 -Tener en cuenta que el array con las funciones de activacion dependerá del numero de capas. Será una variable que cambiará con el dataset
--Pensar en vuelta de optimizador
+-Pensar en vuelta de optimizador ¿Se debe fijar learning rate antes?
 -Pensar en vuelta de func. activacion
+-Separar funcion de create_and_use, ya que hace cosas asincronas, nos interesa secuencial
 -Refactor dentro de poco del codigo
