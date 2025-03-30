@@ -1,6 +1,7 @@
 --NO PRIORITARIO :He hecho la aproximacion de calcular el numero de epocas al que se traduce el numero de batches que se desea entrenar,
--Tener en cuenta que el array con las funciones de activacion dependerá del numero de capas. Será una variable que cambiará con el dataset
--Pensar en vuelta de optimizador ¿Se debe fijar learning rate antes?
--Pensar en vuelta de func. activacion
--Separar funcion de create_and_use, ya que hace cosas asincronas, nos interesa secuencial
--Refactor dentro de poco del codigo
+
+-Habia el problema que en la tercera vuelta, al multiplicar los posibles valores de lr *100, era demasiado alto
+
+-Me queda introducir el split en los tuners
+    En el objective -> val_accuracy
+    En el search -> pasar argumento validation data (ver pag google abierta)
