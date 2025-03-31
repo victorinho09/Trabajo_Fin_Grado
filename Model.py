@@ -4,6 +4,7 @@ from keras import Sequential, Input
 from keras.src.layers import Dense
 import tensorflow as tf
 from keras_tuner.src.backend import keras
+from sklearn.model_selection import train_test_split
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -11,11 +12,22 @@ from funciones_auxiliares import get_num_epochs_train, dividir_array
 
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches):
+    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches,X_val=None,y_val=None):
 
         global_batch_logger = GlobalBatchLogger(log_dir)
         global_epoch_logger = EpochCumulativeLogger(log_dir)
         tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, update_freq='epoch')
+
+        #Se coje los datos de validación por paramétro si existen, si no se crean del train set
+        if  (X_val is None) or (y_val is None) :
+            #hacer split del train
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train, test_size=0.3) # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
+        else:
+            self.X_val= X_val
+            self.y_val= y_val
+            self.X_train = X_train
+            self.y_train = y_train
+        self.validation_data = (self.X_val,self.y_val)
 
         # atributos de parametros pasados al fit method de funcion train
         self.validation_split = 0.2  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
@@ -25,17 +37,14 @@ class  Model():
         self.log_dir = log_dir
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
 
-
-
         # atributos de parametros pasados al tuner
         self.max_trials = 5
-        self.objective = "accuracy"
+        self.objective = "val_accuracy"
         self.overwrite = True
         self.directory = "bayesian_tuner"
 
-        #Mas atributos
-        self.X_train = X_train #Para ser usados luego en la estructura de la capa inicial, final y para el entrenamiento del modelo
-        self.y_train = y_train
+        #atributo del metodo search del tuner
+        self.num_epochs_tuner = 5
 
         self.num_batches = num_batches
         self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
@@ -122,7 +131,7 @@ class  Model():
         self.model = self.create_and_compile_definitive_model()
 
     def search(self):
-            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=10)
+            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data)
             self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
