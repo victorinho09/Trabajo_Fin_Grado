@@ -1,7 +1,4 @@
 import math
-from keras import Sequential, Input
-from keras.src.layers import Dense
-
 
 def dividir_array(arr, n):
     """
@@ -58,8 +55,6 @@ def get_num_epochs_train(
             "No se llega a ejecutar 1 epoca entera --> numEpochs = 0????")  # preguntar: ¿Queremos comparar ejecuciones con las epochs?
     numEpochs = math.ceil(desired_batches / num_batches_per_epoch)
     return numEpochs, num_batches_per_epoch
-
-
 
 def compute_steps_for_batches(
     desired_batches,

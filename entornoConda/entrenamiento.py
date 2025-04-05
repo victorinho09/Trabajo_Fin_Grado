@@ -1,6 +1,3 @@
-import keras_tuner
-from keras_tuner.src import keras_tuner_export
-
 from Model import Model
 from funciones_preprocesamiento import preprocess_data
 

@@ -1,7 +1,0 @@
---NO PRIORITARIO :He hecho la aproximacion de calcular el numero de epocas al que se traduce el numero de batches que se desea entrenar,
-
--Habia el problema que en la tercera vuelta, al multiplicar los posibles valores de lr *100, era demasiado alto
-
--Me queda introducir el split en los tuners
-    En el objective -> val_accuracy
-    En el search -> pasar argumento validation data (ver pag google abierta)

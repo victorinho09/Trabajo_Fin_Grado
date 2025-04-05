@@ -40,12 +40,13 @@ data_communities_and_crime = fetch_ucirepo(id=183).data #regresion --> Funciona 
 data_parkinsons_telemonitoring = fetch_ucirepo(id=189).data #regresion -->No coge datos, no contiene nada
 '''
 
-#numero de neuronas rango (capa inicial) : raiz del numero de features - numero de features
-#numero capas:
+
 
 
 train_and_evaluate(data_iris,500, "logs/fit/iris/500batches",16)
 '''
+
+
 train_and_evaluate(data_heart_disease,500, "logs/fit/heart_disease/500batches",16)
 train_and_evaluate(data_breast_cancer_wisconsin_diagnostic,500, "logs/fit/breast_cancer_wisconsin_diagnostic/500batches",16)
 train_and_evaluate(data_bank_marketing,500, "logs/fit/bank_marketing/500batches",16)

@@ -1,7 +1,6 @@
-from keras.src.callbacks import Callback
 import tensorflow as tf
 
-class GlobalBatchLogger(Callback):
+class GlobalBatchLogger(tf.keras.callbacks.Callback):
     def __init__(self, log_dir):
         super(GlobalBatchLogger, self).__init__()
         self.log_dir = log_dir

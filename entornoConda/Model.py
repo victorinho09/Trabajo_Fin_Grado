@@ -1,15 +1,11 @@
 import keras_tuner as kt
 import math
-from keras import Sequential, Input
-from keras.src.layers import Dense
 import tensorflow as tf
-from keras_tuner.src.backend import keras
 from sklearn.model_selection import train_test_split
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array
-
 
 class  Model():
     def __init__(self,X_train,y_train,log_dir,batch_size,num_batches,X_val=None,y_val=None):
@@ -37,12 +33,6 @@ class  Model():
         self.log_dir = log_dir
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
 
-        # atributos de parametros pasados al tuner
-        self.max_trials = 5
-        self.objective = "val_accuracy"
-        self.overwrite = True
-        self.directory = "bayesian_tuner"
-
         #atributo del metodo search del tuner
         self.num_epochs_tuner = 5
 
@@ -56,7 +46,8 @@ class  Model():
         self.optimizers_list = ['adam', 'rmsprop', 'adamax']
         self.optimizer = None
         self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-        self.hidden_activation_function = 'relu'  # misma funcion de activacion para todas las capas. NO merece la pena tener 1 distinta por cada capa. Se incrementa demasiado número de hiperparaemetros que tunear
+        self.hidden_activation_function = None
+        self.hidden_activation_function_list = ['relu','leaky_relu','elu','silu']# silu = swish. Misma funcion de activacion para todas las capas. NO merece la pena tener 1 distinta por cada capa. Se incrementa demasiado número de hiperparaemetros que tunear
         self.output_activation_function = 'softmax'
         self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
         self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
@@ -69,6 +60,13 @@ class  Model():
 
         self.min_lr = 1e-5
         self.max_lr = 1e-2
+
+        # atributos de parametros pasados al tuner
+        self.max_trials = 5
+        self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
+        self.objective = "val_accuracy"
+        self.overwrite = True
+        self.directory = "bayesian_tuner"
 
         self.bayesian_opt_tuner = None
         self.best_hyperparameters = None
@@ -113,8 +111,24 @@ class  Model():
         else:
             self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
 
+        '''
+        ####TERCERA VUELTA
+        print("Entrada vuelta 3")
+        # Se decide funcion de activacion de las capas ocultas
 
-        ####TERCERA VUELTA####
+        self.bayesian_opt_tuner = kt.BayesianOptimization(
+            self.select_activation_function, objective=self.objective, max_trials=self.max_trials_activation_function_tuner,overwrite=self.overwrite,
+            directory=self.directory, project_name='activation_function'
+        )
+
+        # deja en los atributos de la clase los resultados del fine tuning
+        self.search()
+
+        # asignamos resultados de la tercera vuelta:
+        self.assign_hidden_activation_function_to_model()
+
+        '''
+        ####Cuarta VUELTA####
         print("Entrada vuelta 3")
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
@@ -137,6 +151,9 @@ class  Model():
     def assign_num_hidden_layers_to_model(self):
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
 
+    def assign_hidden_activation_function_to_model(self):
+        self.hidden_activation_function = self.best_hyperparameters['hidden_activation_function']
+
     def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']
 
@@ -148,15 +165,15 @@ class  Model():
 
     def create_and_compile_definitive_model(self):
 
-        model = Sequential()
-        model.add(Input(self.num_neurons_input_layer))
+        model = tf.keras.layers.Sequential()
+        model.add(tf.keras.layers.Input(self.num_neurons_input_layer))
 
         # Se añaden el resto de capas del modelo
         for i in range(self.num_hidden_layers):
-            model.add(Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function))
+            model.add(tf.keras.layers.Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function))
 
         # Se añade capa de salida. La función de activación corresponde al último
-        model.add(Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
+        model.add(tf.keras.layers.Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
 
         #Se vuelve a crear instancia de optimizador, ya que el anterior ya está modificado y no puede ser usado
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
@@ -166,18 +183,34 @@ class  Model():
         return model
 
     def create_and_compile_model(self):
-        model = Sequential()
-        model.add(Input(self.num_neurons_input_layer))
+        model = tf.keras.layers.Sequential()
+        model.add(tf.keras.layers.Input(self.num_neurons_input_layer))
 
         # Se añaden el resto de capas del modelo
         for i in range(self.num_hidden_layers):
-            model.add(Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function))
+            model.add(tf.keras.layers.Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function))
 
         # Se añade capa de salida. La función de activación corresponde al último
-        model.add(Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
+        model.add(tf.keras.layers.Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
+        return model
+
+    def select_activation_function(self,hp):
+        hidden_activation_function_choice = hp.Choice("hidden_activation_function", self.hidden_activation_function_list)
+
+        print(tf.keras)
+        if hidden_activation_function_choice == 'relu':
+            self.hidden_activation_function = tf.keras.activations.relu
+        if hidden_activation_function_choice == "leaky_relu":
+            self.hidden_activation_function = tf.keras.activations.leaky_relu
+        if hidden_activation_function_choice == "elu":
+            self.hidden_activation_function = tf.keras.activations.elu
+        if hidden_activation_function_choice == "silu":
+            self.hidden_activation_function = tf.keras.activations.silu
+
+        model = self.create_and_compile_model()
         return model
 
     #Se decide optimizador
@@ -189,11 +222,11 @@ class  Model():
 
         ###CUIDADO ---> SI LA LISTA CONTIENE ALGUNO QUE NO SEA ESTOS, SALTARÁ ERROR
         if optimizer_choice == 'adam':
-            self.optimizer = keras.optimizers.Adam(learning_rate=lr)
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
         if optimizer_choice == "rmsprop":
-            self.optimizer = keras.optimizers.RMSprop(learning_rate=lr)
+            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
         if optimizer_choice == "adamax":
-            self.optimizer = keras.optimizers.Adamax(learning_rate=lr)
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate=lr)
 
         model = self.create_and_compile_model()
         return model
@@ -235,6 +268,7 @@ class  Model():
             verbose=self.verbose,
             callbacks=self.callbacks
         )
+        print(self.num_epochs)
         #Obtenemos las metricas
         self.set_metrics(self.callbacks[2])
 

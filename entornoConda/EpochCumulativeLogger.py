@@ -1,8 +1,7 @@
 import tensorflow as tf
-from keras.src.callbacks import Callback
 
 # Con esta callback, registramos la perdida y precisión acumulada tras cada época.
-class EpochCumulativeLogger(Callback):
+class EpochCumulativeLogger(tf.keras.callbacks.Callback):
     def __init__(self, log_dir):
         super(EpochCumulativeLogger, self).__init__()
         self.log_dir = log_dir
