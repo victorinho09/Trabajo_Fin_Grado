@@ -165,7 +165,7 @@ class  Model():
 
     def create_and_compile_definitive_model(self):
 
-        model = tf.keras.layers.Sequential()
+        model = tf.keras.Sequential()
         model.add(tf.keras.layers.Input(self.num_neurons_input_layer))
 
         # Se añaden el resto de capas del modelo
@@ -183,7 +183,7 @@ class  Model():
         return model
 
     def create_and_compile_model(self):
-        model = tf.keras.layers.Sequential()
+        model = tf.keras.Sequential()
         model.add(tf.keras.layers.Input(self.num_neurons_input_layer))
 
         # Se añaden el resto de capas del modelo
