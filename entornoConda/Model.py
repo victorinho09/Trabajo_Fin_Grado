@@ -46,7 +46,7 @@ class  Model():
         self.optimizers_list = ['adam', 'rmsprop', 'adamax']
         self.optimizer = None
         self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
-        self.hidden_activation_function = None
+        self.hidden_activation_function = tf.keras.activations.relu
         self.hidden_activation_function_list = ['relu','leaky_relu','elu','silu']# silu = swish. Misma funcion de activacion para todas las capas. NO merece la pena tener 1 distinta por cada capa. Se incrementa demasiado número de hiperparaemetros que tunear
         self.output_activation_function = 'softmax'
         self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
@@ -152,7 +152,14 @@ class  Model():
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
 
     def assign_hidden_activation_function_to_model(self):
-        self.hidden_activation_function = self.best_hyperparameters['hidden_activation_function']
+        if self.best_hyperparameters['hidden_activation_function'] == 'relu':
+            self.hidden_activation_function = tf.keras.activations.relu
+        if self.best_hyperparameters['hidden_activation_function'] == "leaky_relu":
+            self.hidden_activation_function = tf.keras.activations.leaky_relu
+        if self.best_hyperparameters['hidden_activation_function'] == "elu":
+            self.hidden_activation_function = tf.keras.activations.elu
+        if self.best_hyperparameters['hidden_activation_function'] == "silu":
+            self.hidden_activation_function = tf.keras.activations.silu
 
     def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']
@@ -182,6 +189,7 @@ class  Model():
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
         return model
+
 
     def create_and_compile_model(self):
         model = tf.keras.Sequential()
@@ -213,6 +221,7 @@ class  Model():
         if hidden_activation_function_choice == "silu":
             self.hidden_activation_function = tf.keras.activations.silu
 
+        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -231,6 +240,7 @@ class  Model():
         if optimizer_choice == "adamax":
             self.optimizer = tf.keras.optimizers.Adamax(learning_rate=lr)
 
+        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -243,6 +253,8 @@ class  Model():
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1],sample='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
             else:
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1])
+
+        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -255,6 +267,7 @@ class  Model():
         self.lr = hp.Float("lr", min_value=self.min_lr, max_value=self.max_lr, sampling='log')
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr) #No se inicializa en el constructor, ya que nos hace falta primero el valor de lr
 
+        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -301,3 +314,12 @@ class  Model():
 
     def evaluate(self,X_test_scaled, y_test_encoded):
         self.model.evaluate(X_test_scaled, y_test_encoded)
+
+    def print_attributes(self):
+        print('[')
+        print('Optimizer: ', type(self.optimizer).__name__)
+        print('Hidden activation function: ', self.hidden_activation_function.__name__)
+        print('Learning Rate: ', self.lr)
+        print('Number of hidden layers: ',self.num_hidden_layers)
+        print('Number of neurons per hidden layer: ',self.num_neurons_per_hidden)
+        print(']')
