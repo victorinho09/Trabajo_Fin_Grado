@@ -111,7 +111,7 @@ class  Model():
         else:
             self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
 
-        '''
+
         ####TERCERA VUELTA
         print("Entrada vuelta 3")
         # Se decide funcion de activacion de las capas ocultas
@@ -127,9 +127,9 @@ class  Model():
         # asignamos resultados de la tercera vuelta:
         self.assign_hidden_activation_function_to_model()
 
-        '''
+
         ####Cuarta VUELTA####
-        print("Entrada vuelta 3")
+        print("Entrada vuelta 4")
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
             directory=self.directory, project_name='optimizer_and_lr'
@@ -175,6 +175,7 @@ class  Model():
         # Se añade capa de salida. La función de activación corresponde al último
         model.add(tf.keras.layers.Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
 
+        ###ESTA MAL, DEBE SER DEL TIPO QUE MEJOR CUADREN LOS RESULTADOS
         #Se vuelve a crear instancia de optimizador, ya que el anterior ya está modificado y no puede ser usado
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
 
@@ -200,7 +201,9 @@ class  Model():
     def select_activation_function(self,hp):
         hidden_activation_function_choice = hp.Choice("hidden_activation_function", self.hidden_activation_function_list)
 
-        print(tf.keras)
+        ##nuevo optimizer. Será un Adam, ya que la eleccion de optimizador se hace en la siguiente vuelta
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
+
         if hidden_activation_function_choice == 'relu':
             self.hidden_activation_function = tf.keras.activations.relu
         if hidden_activation_function_choice == "leaky_relu":
