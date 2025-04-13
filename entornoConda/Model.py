@@ -138,7 +138,9 @@ class  Model():
         # deja en los atributos de la clase los resultados del fine tuning
         self.search()
 
-        # asignamos resultados de la primera vuelta:
+
+        # asignamos resultados:
+        self.assign_lr_to_model()
         self.assign_optimizer_to_model()
 
         #al fin, se construye el modelo final
@@ -165,7 +167,12 @@ class  Model():
         self.lr = self.best_hyperparameters['lr']
 
     def assign_optimizer_to_model(self):
-        self.optimizer = self.best_hyperparameters['optimizer']
+        if self.best_hyperparameters['optimizer'] == 'adam':
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
+        if self.best_hyperparameters['optimizer'] == "rmsprop":
+            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr)
+        if self.best_hyperparameters['optimizer'] == "adamax":
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate=self.lr)
 
     def assign_num_neurons_per_hidden_to_model(self):
         self.num_neurons_per_hidden = self.best_hyperparameters['num_neurons_per_hidden']
@@ -181,10 +188,6 @@ class  Model():
 
         # Se añade capa de salida. La función de activación corresponde al último
         model.add(tf.keras.layers.Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
-
-        ###ESTA MAL, DEBE SER DEL TIPO QUE MEJOR CUADREN LOS RESULTADOS
-        #Se vuelve a crear instancia de optimizador, ya que el anterior ya está modificado y no puede ser usado
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr)
 
         # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
         model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
