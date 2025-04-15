@@ -46,6 +46,12 @@ class  Model():
         self.optimizers_list = ['adam', 'nadam', 'rmsprop','sgd']
         self.optimizer = None
         self.optimizer_name = 'adam'
+        self.optimizer_beta1= None
+        self.optimizer_beta2 = None
+        self.optimizer_epsilon = None
+        self.optimizer_rho = None
+        self.optimizer_nesterov = None
+        self.optimizer_momentum= None
         self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
         self.hidden_activation_function = tf.keras.activations.relu
         self.hidden_activation_function_list = ['relu','leaky_relu','elu','silu']# silu = swish. Misma funcion de activacion para todas las capas. NO merece la pena tener 1 distinta por cada capa. Se incrementa demasiado número de hiperparaemetros que tunear
@@ -63,7 +69,7 @@ class  Model():
         self.max_lr = 1e-2
 
         # atributos de parametros pasados al tuner
-        self.max_trials = 5
+        self.max_trials = 15
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -108,7 +114,6 @@ class  Model():
 
             # asignamos resultados de la segunda vuelta:
             self.assign_num_neurons_per_hidden_to_model()
-            #self.assign_lr_to_model()   Hay que ver como hacerlo
         else:
             self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
 
@@ -157,6 +162,14 @@ class  Model():
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
 
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Parámetros del optimizador')
+        print(self.optimizer_nesterov)
+        print(self.optimizer_momentum)
+        print(self.optimizer_beta1)
+        print(self.optimizer_rho)
+        print(self.optimizer_beta2)
+        print(self.optimizer_epsilon)
+
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_definitive_model()
 
@@ -196,27 +209,40 @@ class  Model():
 
     def assign_optimizer_with_params_to_model(self):
         if self.optimizer_name == 'adam':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,
-                                                      beta_1=self.best_hyperparameters['beta1'],
-                                                      beta_2=self.best_hyperparameters['beta2'],
-                                                      epsilon=self.best_hyperparameters['epsilon'])
+                                                      beta_1=self.optimizer_beta1,
+                                                      beta_2=self.optimizer_beta2,
+                                                      epsilon=self.optimizer_epsilon)
 
         if self.optimizer_name == 'rmsprop':
+            self.optimizer_rho = self.best_hyperparameters['rho']
+            self.optimizer_momentum = self.best_hyperparameters['momentum']
+            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
+
             self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,
-                                                         rho=self.best_hyperparameters['rho'],
-                                                         momentum=self.best_hyperparameters['momentum'],
-                                                         epsilon=self.best_hyperparameters['epsilon'])
+                                                         rho=self.optimizer_rho,
+                                                         momentum=self.optimizer_momentum,
+                                                         epsilon=self.optimizer_epsilon)
 
         if self.optimizer_name == 'nadam':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
             self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,
-                                                       beta_1=self.best_hyperparameters['beta1'],
-                                                       beta_2=self.best_hyperparameters['beta2'],
-                                                       epsilon=self.best_hyperparameters['epsilon'])
+                                                       beta_1=self.optimizer_beta1,
+                                                       beta_2=self.optimizer_beta2,
+                                                       epsilon=self.optimizer_epsilon)
 
         if self.optimizer_name == 'sgd':
+            self.optimizer_momentum = self.best_hyperparameters['momentum']
+            self.optimizer_nesterov = self.best_hyperparameters['nesterov']
+
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,
-                                                     momentum=self.best_hyperparameters['momentum'],
-                                                     nesterov=self.best_hyperparameters['nesterov'])
+                                                     momentum=self.optimizer_momentum,
+                                                     nesterov=self.optimizer_nesterov)
 
 
     def assign_num_neurons_per_hidden_to_model(self):
