@@ -5,3 +5,5 @@ Si luego se puede pedir por parametro el optimizador o funcion de activation, ha
 -Si se piden por parametro la optimizers_list, habria que hacer bucle en assign_optimizer con los nombres dinamicos.
 -Existe valor magico en assign_optimizers, ya que en vez de coger self.optimizers_list[0], se coge Adam
 -Si el max_trials es bajo, Iris dataset da resultados inconsistentes, es decir, da bandazos de precisión sobre el dataset entero.
+-Con breast_cancer -> Consigo 97% precision, mas que ucirepo dice (96,5%)
+-Si max_trials del search se aumenta, salen muchos convergence warning, ya que debe estar cerca del limite

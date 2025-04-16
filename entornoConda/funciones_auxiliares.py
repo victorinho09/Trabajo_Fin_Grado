@@ -24,13 +24,11 @@ def get_y_target_col(data_obj):
     # CASO 1: Si ya existe 'target'
     if 'target' in cols:
         y = df_targets[['target']].copy()
-        print("Numero cols en y:", y.columns)
         return y
 
     # CASO 2: Si existe 'class'
     if 'class' in cols:
         y = df_targets[['class']].rename(columns={'class': 'target'})
-        print("Numero cols en y:", y.columns)
         return y
 
     # CASO 3: Si solo hay 1 columna, la renombramos

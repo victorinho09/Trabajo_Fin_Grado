@@ -69,7 +69,7 @@ class  Model():
         self.max_lr = 1e-2
 
         # atributos de parametros pasados al tuner
-        self.max_trials = 20
+        self.max_trials = 5
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -178,7 +178,7 @@ class  Model():
         if self.best_hyperparameters['hidden_activation_function'] == "silu":
             self.hidden_activation_function = tf.keras.activations.silu
 
-        print(f"Funcíon de activación óptima: {self.best_hyperparameters['hidden_activation_function']}")
+        print(f"Función de activación óptima: {self.best_hyperparameters['hidden_activation_function']}")
 
     def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']

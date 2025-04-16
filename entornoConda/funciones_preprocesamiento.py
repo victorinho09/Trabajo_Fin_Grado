@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
@@ -7,10 +9,15 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from funciones_auxiliares import get_y_target_col
 
 
-def preprocess_data(data):
+def preprocess_data(data,nombre_fichero_info_dataset):
+
+    directorio_info_datasets = "./info_datasets"
+    os.makedirs(directorio_info_datasets,exist_ok=True)
+    ruta_fichero = os.path.join(directorio_info_datasets, nombre_fichero_info_dataset)
 
     X = pd.DataFrame(data.features, columns=data.feature_names)
     y = get_y_target_col(data)
+
 
     #Elimino las filas que contienen que pertenecen a una clase con menos de 2 instancias en el dataset
     #porque sino stratify falla, al no poder balancear la aparición de clases en ambos sets al splittear
@@ -23,24 +30,22 @@ def preprocess_data(data):
     #Filtrar filas donde y['target'] sea NaN
     #(esto crea una máscara True/False, y solo conservas las True)
     mask_not_nan = ~y['target'].isna()
-    X = X[mask_not_nan].reset_index(drop=True)
-    y = y[mask_not_nan].reset_index(drop=True)
+    X_not_nan = X[mask_not_nan].reset_index(drop=True)
+    y_not_nan = y[mask_not_nan].reset_index(drop=True)
 
     #Train/Test split
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=42, stratify=y #Hace falta stratify porque hay algún dataset (bike_sharing)
+        X_not_nan, y_not_nan, test_size=0.2, random_state=42, stratify=y #Hace falta stratify porque hay algún dataset (bike_sharing)
         #que contiene muchas clases objetivo y provoca que no esté balanceado el train y el test set.
     )
 
-    #print(y_train.info())
-    print("y_train count values:", y_train['target'].nunique())
-    print("y_train values:", y_train['target'].unique())
-    #print(y_train.head(30))
+    #Con w, se sobreescribe el fichero entero
+    with open(ruta_fichero, "w") as f:
+        f.write(f"y_train_count values: {y_train['target'].nunique()}\n")
 
-    '''
-    print("X_train shape antes de imputer:", X_train.shape)
-    print("¿NaNs en X_train?", X_train.isna().sum())
-    '''
+    with open(ruta_fichero, "a") as f:
+        f.write(f"y_train values: {y_train['target'].unique()}\n")
+        y_train.info(buf=f)
 
     # 4) One-Hot Encoding para y
     encoder = OneHotEncoder(sparse_output=False)
@@ -54,16 +59,25 @@ def preprocess_data(data):
     categorical_cols_train = X_train.select_dtypes(exclude=np.number).columns
 
     if len(numeric_cols_train) == 0 and len(categorical_cols_train) == 0:
-      raise ValueError("No hay columnas numéricas ni categóricas en X_train")
+        mensaje_info = "No hay columnas numéricas ni categóricas en X_train"
+        with open(ruta_fichero, "a") as f:
+            f.write(f"{mensaje_info} \n")
+        raise ValueError(mensaje_info)
+
 
     numeric_cols_test = X_test.select_dtypes(include=np.number).columns
     categorical_cols_test = X_test.select_dtypes(exclude=np.number).columns
 
     if len(numeric_cols_test) == 0 and len(categorical_cols_test) == 0:
-      raise ValueError("No hay columnas numéricas ni categóricas en X_test")
+        mensaje_info = "No hay columnas numéricas ni categóricas en X_test"
+        with open(ruta_fichero, "a") as f:
+            f.write(f"{mensaje_info} \n")
+        raise ValueError(mensaje_info)
 
     if(len(categorical_cols_train) == 0):
-        print("NO hay columnas categoricas en X_train")
+        mensaje_info = "No hay columnas categoricas en X_train"
+        with open(ruta_fichero, "a") as f:
+            f.write(f"{mensaje_info} \n")
 
     # Imputar numéricas
     imputer_num = SimpleImputer(strategy='mean')
@@ -93,7 +107,9 @@ def preprocess_data(data):
     # Codificar categóricas
 
     if(len(categorical_cols_train) != 0):
-        print("Hay columnas categoricas en X_train")
+        mensaje_info = "Hay columnas categoricas en X_train"
+        with open(ruta_fichero, "a") as f:
+            f.write(f"{mensaje_info} \n")
         ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
         X_train_cat_encoded = ohe.fit_transform(X_train_cat_imputed)
         X_test_cat_encoded  = ohe.transform(X_test_cat_imputed)
@@ -107,8 +123,11 @@ def preprocess_data(data):
     X_test_final  = np.concatenate([X_test_num_scaled, X_test_cat_encoded],  axis=1)
 
     # Revisar si hay NaN en la salida final
-    print("¿Hay NaN en X_train_final?", np.isnan(X_train_final).any())
-    print("####################################")
-    print("")
+    with open(ruta_fichero, "a") as f:
+        f.write(f"¿Hay NaN en X_train_final? {np.isnan(X_train_final).any()} \n")
+
+    with open(ruta_fichero, "a") as f:
+        for i, col in enumerate(X.columns):
+            f.write(f"{i}: {col} \n")
 
     return X_train_final, X_test_final, y_train_encoded, y_test_encoded
