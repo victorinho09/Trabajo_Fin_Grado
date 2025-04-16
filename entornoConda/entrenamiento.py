@@ -7,5 +7,5 @@ def train_and_evaluate(dataset, num_batches, log_dir, batch_size):
 
     model = Model(X_train_scaled, y_train_encoded,log_dir,batch_size,num_batches)
     model.autotune()
-    model.train()
-    model.evaluate(X_test_scaled, y_test_encoded)
+    #model.train()
+    # model.evaluate(X_test_scaled, y_test_encoded)

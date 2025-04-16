@@ -108,5 +108,7 @@ def preprocess_data(data):
 
     # Revisar si hay NaN en la salida final
     print("¿Hay NaN en X_train_final?", np.isnan(X_train_final).any())
+    print("####################################")
+    print("")
 
     return X_train_final, X_test_final, y_train_encoded, y_test_encoded

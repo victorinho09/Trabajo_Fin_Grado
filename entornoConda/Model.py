@@ -14,7 +14,7 @@ class  Model():
         global_epoch_logger = EpochCumulativeLogger(log_dir)
         tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, update_freq='epoch')
 
-        #Se coje los datos de validación por paramétro si existen, si no se crean del train set
+        #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
         if  (X_val is None) or (y_val is None) :
             #hacer split del train
             self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train, test_size=0.3) # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
@@ -69,7 +69,7 @@ class  Model():
         self.max_lr = 1e-2
 
         # atributos de parametros pasados al tuner
-        self.max_trials = 15
+        self.max_trials = 20
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -84,7 +84,6 @@ class  Model():
     def autotune(self):
 
         ####PRIMERA VUELTA####
-        print("Entrada vuelta 1")
         #Se deciden numero de capas ocultas y una primera aprox de lr
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_num_hidden_layers_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
@@ -99,7 +98,6 @@ class  Model():
         self.assign_lr_to_model()
 
         ####SEGUNDA VUELTA###
-        print("Entrada vuelta 2")
         #Se deciden numero de neuronas por capa y nueva aprox de lr
 
         if self.X_train.shape[1] >= 10:
@@ -119,7 +117,6 @@ class  Model():
 
 
         ####TERCERA VUELTA
-        print("Entrada vuelta 3")
         # Se decide funcion de activacion de las capas ocultas
 
         self.bayesian_opt_tuner = kt.BayesianOptimization(
@@ -135,7 +132,6 @@ class  Model():
 
 
         ####Cuarta VUELTA####
-        print("Entrada vuelta 4")
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
             directory=self.directory, project_name='optimizer_and_lr'
@@ -150,7 +146,6 @@ class  Model():
         self.assign_optimizer_to_model()
 
     #####Quinta VUELTA####
-        print("Entrada vuelta 5")
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_params, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
             directory=self.directory, project_name='optimizer_params'
@@ -162,23 +157,16 @@ class  Model():
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
 
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Parámetros del optimizador')
-        print(self.optimizer_nesterov)
-        print(self.optimizer_momentum)
-        print(self.optimizer_beta1)
-        print(self.optimizer_rho)
-        print(self.optimizer_beta2)
-        print(self.optimizer_epsilon)
-
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_definitive_model()
 
     def search(self):
-            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data)
+            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=0)
             self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
+        print(f"Número de hidden layers óptimo: {self.best_hyperparameters['num_hidden']}")
 
     def assign_hidden_activation_function_to_model(self):
         if self.best_hyperparameters['hidden_activation_function'] == 'relu':
@@ -190,8 +178,11 @@ class  Model():
         if self.best_hyperparameters['hidden_activation_function'] == "silu":
             self.hidden_activation_function = tf.keras.activations.silu
 
+        print(f"Funcíon de activación óptima: {self.best_hyperparameters['hidden_activation_function']}")
+
     def assign_lr_to_model(self):
         self.lr = self.best_hyperparameters['lr']
+        print(f"Tasa de aprendizaje óptima: {self.best_hyperparameters['lr']}")
 
     def assign_optimizer_to_model(self):
         if self.best_hyperparameters['optimizer'] == 'adam':
@@ -207,6 +198,8 @@ class  Model():
             self.optimizer_name = 'sgd'
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr)
 
+        print(f"Optimizador óptimo: {self.best_hyperparameters['optimizer']}")
+
     def assign_optimizer_with_params_to_model(self):
         if self.optimizer_name == 'adam':
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
@@ -216,6 +209,10 @@ class  Model():
                                                       beta_1=self.optimizer_beta1,
                                                       beta_2=self.optimizer_beta2,
                                                       epsilon=self.optimizer_epsilon)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
 
         if self.optimizer_name == 'rmsprop':
             self.optimizer_rho = self.best_hyperparameters['rho']
@@ -226,6 +223,10 @@ class  Model():
                                                          rho=self.optimizer_rho,
                                                          momentum=self.optimizer_momentum,
                                                          epsilon=self.optimizer_epsilon)
+            print(f"----Parámetros óptimos:")
+            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
+            print(f"Rho: {self.best_hyperparameters['rho']}")
+            print(f"Momentum: {self.best_hyperparameters['momentum']}")
 
         if self.optimizer_name == 'nadam':
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
@@ -235,6 +236,10 @@ class  Model():
                                                        beta_1=self.optimizer_beta1,
                                                        beta_2=self.optimizer_beta2,
                                                        epsilon=self.optimizer_epsilon)
+            print(f"----Parámetros óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
 
         if self.optimizer_name == 'sgd':
             self.optimizer_momentum = self.best_hyperparameters['momentum']
@@ -244,9 +249,13 @@ class  Model():
                                                      momentum=self.optimizer_momentum,
                                                      nesterov=self.optimizer_nesterov)
 
+            print(f"----Parámetros óptimos:")
+            print(f"Nesterov: {self.best_hyperparameters['nesterov']}")
+            print(f"Momentum: {self.best_hyperparameters['momentum']}")
 
     def assign_num_neurons_per_hidden_to_model(self):
         self.num_neurons_per_hidden = self.best_hyperparameters['num_neurons_per_hidden']
+        print(f"Número de neuronas por capa oculta óptimo: {self.best_hyperparameters['num_neurons_per_hidden']}")
 
     def create_and_compile_definitive_model(self):
 
@@ -295,7 +304,6 @@ class  Model():
         if hidden_activation_function_choice == "silu":
             self.hidden_activation_function = tf.keras.activations.silu
 
-        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -316,21 +324,21 @@ class  Model():
         if optimizer_choice == "sgd":
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
 
-        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
     #se deciden numero num_neuronas_por_capa y lr otra vez
     def select_num_neurons_per_hidden(self,hp):
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
+
         if self.X_train.shape[1] < self.min_num_neurons_per_hidden:
             self.num_neurons_per_hidden = self.min_num_neurons_per_hidden  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
         else:
             if self.X_train.shape[1] > self.threshold_num_neurons_per_hidden:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1],sample='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1],sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
             else:
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1])
 
-        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -343,7 +351,6 @@ class  Model():
         self.lr = hp.Float("lr", min_value=self.min_lr, max_value=self.max_lr, sampling='log')
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr) #No se inicializa en el constructor, ya que nos hace falta primero el valor de lr
 
-        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -369,7 +376,6 @@ class  Model():
             momentum_choice = hp.Float("momentum",min_value=0.7, max_value=0.95)
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice)
 
-        self.print_attributes()
         model = self.create_and_compile_model()
         return model
 
@@ -416,12 +422,3 @@ class  Model():
 
     def evaluate(self,X_test_scaled, y_test_encoded):
         self.model.evaluate(X_test_scaled, y_test_encoded)
-
-    def print_attributes(self):
-        print('[')
-        print('Optimizer: ', type(self.optimizer).__name__)
-        print('Hidden activation function: ', self.hidden_activation_function.__name__)
-        print('Learning Rate: ', self.lr)
-        print('Number of hidden layers: ',self.num_hidden_layers)
-        print('Number of neurons per hidden layer: ',self.num_neurons_per_hidden)
-        print(']')
