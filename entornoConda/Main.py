@@ -19,9 +19,9 @@ data_breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17).data #clasificaci
 print("Breast_cancer dataset cargado")
 train_and_evaluate(data_breast_cancer_wisconsin_diagnostic,500, "logs/fit/breast_cancer_wisconsin_diagnostic/500batches",16,"breast_cancer_wisconsin_diagnostic")
 
-data_bank_marketing = fetch_ucirepo(id=222).data #clasificacion
-print("Bank_marketing dataset cargado")
-train_and_evaluate(data_bank_marketing,500, "logs/fit/bank_marketing/500batches",16,"bank_marketing")
+# data_bank_marketing = fetch_ucirepo(id=222).data #clasificacion
+# print("Bank_marketing dataset cargado")
+# train_and_evaluate(data_bank_marketing,500, "logs/fit/bank_marketing/500batches",16,"bank_marketing")
 
 # data_mushroom = fetch_ucirepo(id=73).data #clasificacion
 # print("Mushroom dataset cargado")

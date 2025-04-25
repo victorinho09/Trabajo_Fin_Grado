@@ -1,5 +1,7 @@
 import keras_tuner as kt
 import math
+
+import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
@@ -69,7 +71,7 @@ class  Model():
         self.max_lr = 1e-2
 
         # atributos de parametros pasados al tuner
-        self.max_trials = 5
+        self.max_trials = 15
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -356,10 +358,10 @@ class  Model():
 
     def select_optimizer_params(self,hp):
 
-        epsilon_choice = hp.Float("epsilon",min_value=1e-9, max_value=1e-4, sampling='log')
-        nesterov_choice = hp.Boolean("nesterov", default=True)
-        beta1_choice = hp.Float("beta1",min_value=0.7, max_value=0.99)
-        beta2_choice = hp.Float("beta2",min_value=0.85, max_value=0.9999)
+        epsilon_choice = np.float32(hp.Float("epsilon",min_value=1e-9, max_value=1e-4, sampling='log'))
+        nesterov_choice = np.float32(hp.Boolean("nesterov", default=True))
+        beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
+        beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
 
         if self.optimizer_name == 'adam':
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,epsilon=epsilon_choice)
