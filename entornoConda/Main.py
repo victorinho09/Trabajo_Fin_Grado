@@ -5,19 +5,19 @@ from entrenamiento import train_and_evaluate
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
 print("Iris dataset cargado")
-train_and_evaluate(data_iris,500, "logs/fit/iris/500batches",16,"iris")
+train_and_evaluate(data_iris,50, "logs/fit/iris/500batches",16,"iris")
 
-data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
-print("Heart_disease dataset cargado")
-train_and_evaluate(data_heart_disease,500, "logs/fit/heart_disease/500batches",16,"heart_disease")
+#data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
+#print("Heart_disease dataset cargado")
+#train_and_evaluate(data_heart_disease,500, "logs/fit/heart_disease/500batches",16,"heart_disease")
 
 # data_adult = fetch_ucirepo(id=2).data #clasificacion
 # print("Adult dataset cargado")
 # train_and_evaluate(data_adult,500, "logs/fit/adult/500batches",16,"adult")
 
-data_breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17).data #clasificacion
-print("Breast_cancer dataset cargado")
-train_and_evaluate(data_breast_cancer_wisconsin_diagnostic,500, "logs/fit/breast_cancer_wisconsin_diagnostic/500batches",16,"breast_cancer_wisconsin_diagnostic")
+#data_breast_cancer_wisconsin_diagnostic = fetch_ucirepo(id=17).data #clasificacion
+#print("Breast_cancer dataset cargado")
+#train_and_evaluate(data_breast_cancer_wisconsin_diagnostic,500, "logs/fit/breast_cancer_wisconsin_diagnostic/500batches",16,"breast_cancer_wisconsin_diagnostic")
 
 # data_bank_marketing = fetch_ucirepo(id=222).data #clasificacion
 # print("Bank_marketing dataset cargado")

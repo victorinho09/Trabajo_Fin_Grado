@@ -61,14 +61,14 @@ class  Model():
         self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
         self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
 
-        self.min_num_neurons_per_hidden = 10
+        self.min_num_neurons_per_hidden = 30
         self.threshold_num_neurons_per_hidden = 100 #numero de features a partir del cual la búsqueda del número se hace logarítmica
 
         self.min_num_hidden_layers = 2
-        self.max_num_hidden_layers = math.ceil(math.sqrt(self.X_train.shape[1])) #sqroot(nº features)
+        self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1]))) #sqroot(nº features)
 
-        self.min_lr = 1e-5
-        self.max_lr = 1e-2
+        self.min_lr = 1e-8 #Minimiza ConvergenceWarnings en iris almenos
+        self.max_lr = 1e-1
 
         # atributos de parametros pasados al tuner
         self.max_trials = 15
@@ -91,7 +91,6 @@ class  Model():
             self.select_num_hidden_layers_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
             directory=self.directory, project_name='num_hidden_layers_and_lr'
         )
-
         #deja en los atributos de la clase los resultados del fine tuning
         self.search()
 
@@ -146,7 +145,7 @@ class  Model():
         # asignamos resultados:
         self.assign_lr_to_model()
         self.assign_optimizer_to_model()
-
+        """
     #####Quinta VUELTA####
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_params, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
@@ -158,13 +157,14 @@ class  Model():
 
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
-
+        """
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_definitive_model()
 
     def search(self):
-            self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=0)
-            self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
+        #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
+        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=1)
+        self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
         self.num_hidden_layers = self.best_hyperparameters['num_hidden']
@@ -314,7 +314,7 @@ class  Model():
 
         optimizer_choice = hp.Choice("optimizer",self.optimizers_list)
         #también se reentrena lr, ya que salia aviso de que si se exploraban mas valores (menores de 1e-5) podia ir mejor
-        lr = hp.Float("lr",min_value= (self.lr / 100), max_value= self.lr)
+        lr = hp.Float("lr",min_value= (self.lr / 100), max_value= self.lr*100, sampling='log')
 
         ###CUIDADO ---> SI LA LISTA CONTIENE ALGUNO QUE NO SEA ESTOS, SALTARÁ ERROR
         if optimizer_choice == 'adam':
@@ -394,7 +394,7 @@ class  Model():
             verbose=self.verbose,
             callbacks=self.callbacks
         )
-        print(self.num_epochs)
+        print("Numero de epocas patra el entrenamiento final:", self.num_epochs)
         #Obtenemos las metricas
         self.set_metrics(self.callbacks[2])
 
@@ -421,6 +421,7 @@ class  Model():
             self.metrics.append(info_epoch)
             print(info_epoch)
             # print(epoch)
+
 
     def evaluate(self,X_test_scaled, y_test_encoded):
         self.model.evaluate(X_test_scaled, y_test_encoded)
