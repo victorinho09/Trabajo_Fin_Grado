@@ -50,7 +50,6 @@ class  Model():
         self.optimizer_name = 'adam'
         self.optimizer_beta1= None
         self.optimizer_beta2 = None
-        self.optimizer_epsilon = None
         self.optimizer_rho = None
         self.optimizer_nesterov = None
         self.optimizer_momentum= None
@@ -71,7 +70,7 @@ class  Model():
         self.max_lr = 1e-1
 
         # atributos de parametros pasados al tuner
-        self.max_trials = 15
+        self.max_trials = 10
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -120,7 +119,7 @@ class  Model():
         ####TERCERA VUELTA
         # Se decide funcion de activacion de las capas ocultas
 
-        self.bayesian_opt_tuner = kt.BayesianOptimization(
+        self.bayesian_opt_tuner = kt.GridSearch(
             self.select_activation_function, objective=self.objective, max_trials=self.max_trials_activation_function_tuner,overwrite=self.overwrite,
             directory=self.directory, project_name='activation_function'
         )
@@ -145,7 +144,7 @@ class  Model():
         # asignamos resultados:
         self.assign_lr_to_model()
         self.assign_optimizer_to_model()
-        """
+
     #####Quinta VUELTA####
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_params, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
@@ -157,13 +156,13 @@ class  Model():
 
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
-        """
+
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_definitive_model()
 
     def search(self):
         #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
-        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=1)
+        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=0)
         self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
@@ -206,42 +205,32 @@ class  Model():
         if self.optimizer_name == 'adam':
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
             self.optimizer_beta2 = self.best_hyperparameters['beta2']
-            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,
                                                       beta_1=self.optimizer_beta1,
-                                                      beta_2=self.optimizer_beta2,
-                                                      epsilon=self.optimizer_epsilon)
+                                                      beta_2=self.optimizer_beta2)
             print(f"----Parámetros del optimizador óptimos:")
             print(f"Beta1: {self.best_hyperparameters['beta1']}")
             print(f"Beta2: {self.best_hyperparameters['beta2']}")
-            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
 
         if self.optimizer_name == 'rmsprop':
             self.optimizer_rho = self.best_hyperparameters['rho']
             self.optimizer_momentum = self.best_hyperparameters['momentum']
-            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
-
             self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,
                                                          rho=self.optimizer_rho,
-                                                         momentum=self.optimizer_momentum,
-                                                         epsilon=self.optimizer_epsilon)
+                                                         momentum=self.optimizer_momentum)
             print(f"----Parámetros óptimos:")
-            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
             print(f"Rho: {self.best_hyperparameters['rho']}")
             print(f"Momentum: {self.best_hyperparameters['momentum']}")
 
         if self.optimizer_name == 'nadam':
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
             self.optimizer_beta2 = self.best_hyperparameters['beta2']
-            self.optimizer_epsilon = self.best_hyperparameters['epsilon']
             self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,
                                                        beta_1=self.optimizer_beta1,
-                                                       beta_2=self.optimizer_beta2,
-                                                       epsilon=self.optimizer_epsilon)
+                                                       beta_2=self.optimizer_beta2)
             print(f"----Parámetros óptimos:")
             print(f"Beta1: {self.best_hyperparameters['beta1']}")
             print(f"Beta2: {self.best_hyperparameters['beta2']}")
-            print(f"Epsilon: {self.best_hyperparameters['epsilon']}")
 
         if self.optimizer_name == 'sgd':
             self.optimizer_momentum = self.best_hyperparameters['momentum']
@@ -292,6 +281,7 @@ class  Model():
         return model
 
     def select_activation_function(self,hp):
+        print("#####Activation function···············")
         hidden_activation_function_choice = hp.Choice("hidden_activation_function", self.hidden_activation_function_list)
 
         ##nuevo optimizer. Será un Adam, ya que la eleccion de optimizador se hace en la siguiente vuelta
@@ -357,22 +347,20 @@ class  Model():
         return model
 
     def select_optimizer_params(self,hp):
-
-        epsilon_choice = np.float32(hp.Float("epsilon",min_value=1e-9, max_value=1e-4, sampling='log'))
         nesterov_choice = np.float32(hp.Boolean("nesterov", default=True))
         beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
         beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
 
         if self.optimizer_name == 'adam':
-            self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,epsilon=epsilon_choice)
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'rmsprop':
             rho_choice= hp.Float("rho",min_value=0.7,max_value=0.95)
             momentum_choice= hp.Float("momentum",min_value=0.0,max_value=0.9)
-            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice,epsilon=epsilon_choice)
+            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice)
 
         if self.optimizer_name == 'nadam':
-            self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice,epsilon=epsilon_choice)
+            self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'sgd':
             momentum_choice = hp.Float("momentum",min_value=0.7, max_value=0.95)
