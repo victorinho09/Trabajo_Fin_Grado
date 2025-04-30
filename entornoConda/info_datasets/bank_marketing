@@ -1,0 +1,28 @@
+y_train_count values: 2
+y_train values: ['no' 'yes']
+<class 'pandas.core.frame.DataFrame'>
+Index: 36168 entries, 24001 to 44229
+Data columns (total 1 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   target  36168 non-null  object
+dtypes: object(1)
+memory usage: 565.1+ KB
+Hay columnas categoricas en X_train 
+¿Hay NaN en X_train_final? False 
+0: age 
+1: job 
+2: marital 
+3: education 
+4: default 
+5: balance 
+6: housing 
+7: loan 
+8: contact 
+9: day_of_week 
+10: month 
+11: duration 
+12: campaign 
+13: pdays 
+14: previous 
+15: poutcome 

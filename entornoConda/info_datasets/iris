@@ -1,0 +1,16 @@
+y_train_count values: 3
+y_train values: ['Iris-setosa' 'Iris-virginica' 'Iris-versicolor']
+<class 'pandas.core.frame.DataFrame'>
+Index: 120 entries, 8 to 3
+Data columns (total 1 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   target  120 non-null    object
+dtypes: object(1)
+memory usage: 1.9+ KB
+No hay columnas categoricas en X_train 
+¿Hay NaN en X_train_final? False 
+0: sepal length 
+1: sepal width 
+2: petal length 
+3: petal width 

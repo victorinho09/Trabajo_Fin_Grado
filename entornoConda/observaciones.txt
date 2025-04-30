@@ -1,3 +1,7 @@
 --NO PRIORITARIO :He hecho la aproximacion de calcular el numero de epocas al que se traduce el numero de batches que se desea entrenar,
 
--Cuando se va a optimizar, pero se le deja introducir los parametros a mano, se pueden modificar valores?
+-Cuando se va a optimizar, pero se le deja introducir los parametros a mano, se pueden modificar valores de num_neurons_per_hidden y num_hidden_layers?
+-Para las primeras vueltas, que no está decidido el optimizador, he cogido el primero de la lista. Tambien influye en self.optimizer_name
+-Muchas funciones de activacion no estan migradas
+
+-hacer metodo select optimizer params personalizar para cada valor posible

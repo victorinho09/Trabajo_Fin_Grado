@@ -1,0 +1,42 @@
+y_train_count values: 2
+y_train values: ['M' 'B']
+<class 'pandas.core.frame.DataFrame'>
+Index: 455 entries, 10 to 335
+Data columns (total 1 columns):
+ #   Column  Non-Null Count  Dtype 
+---  ------  --------------  ----- 
+ 0   target  455 non-null    object
+dtypes: object(1)
+memory usage: 7.1+ KB
+No hay columnas categoricas en X_train 
+¿Hay NaN en X_train_final? False 
+0: radius1 
+1: texture1 
+2: perimeter1 
+3: area1 
+4: smoothness1 
+5: compactness1 
+6: concavity1 
+7: concave_points1 
+8: symmetry1 
+9: fractal_dimension1 
+10: radius2 
+11: texture2 
+12: perimeter2 
+13: area2 
+14: smoothness2 
+15: compactness2 
+16: concavity2 
+17: concave_points2 
+18: symmetry2 
+19: fractal_dimension2 
+20: radius3 
+21: texture3 
+22: perimeter3 
+23: area3 
+24: smoothness3 
+25: compactness3 
+26: concavity3 
+27: concave_points3 
+28: symmetry3 
+29: fractal_dimension3 
