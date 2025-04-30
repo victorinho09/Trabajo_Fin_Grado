@@ -40,6 +40,7 @@ class  Model():
 
         self.num_batches = num_batches
         self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
+        self.num_epochs_tuner = self.num_epochs
 
         self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_hidden_layers = None
@@ -67,8 +68,8 @@ class  Model():
         self.min_num_hidden_layers = 2
         self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1]))) #sqroot(nº features)
 
-        self.min_lr = 1e-8 #Minimiza ConvergenceWarnings en iris almenos
-        self.max_lr = 1e-1
+        self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
+        self.max_lr = 1e-2
 
         # atributos de parametros pasados al tuner
         self.max_trials = 15
@@ -101,7 +102,7 @@ class  Model():
         ####SEGUNDA VUELTA###
         #Se deciden numero de neuronas por capa y nueva aprox de lr
 
-        if self.X_train.shape[1] >= 10:
+        if self.X_train.shape[1] >= self.min_num_neurons_per_hidden:
 
             self.bayesian_opt_tuner = kt.BayesianOptimization(
                 self.select_num_neurons_per_hidden, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
@@ -333,7 +334,7 @@ class  Model():
     def select_num_neurons_per_hidden(self,hp):
         self.optimizer = tf.keras.optimizers.Adam(learning_rate=self.lr)
 
-        if self.X_train.shape[1] < self.min_num_neurons_per_hidden:
+        if self.X_train.shape[1] <= self.min_num_neurons_per_hidden:
             self.num_neurons_per_hidden = self.min_num_neurons_per_hidden  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
         else:
             if self.X_train.shape[1] > self.threshold_num_neurons_per_hidden:
@@ -389,7 +390,7 @@ class  Model():
             validation_split=self.validation_split,
             # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
             shuffle=self.shuffle,
-            epochs= self.num_epochs,
+            epochs= 50,
             batch_size=self.batch_size,
             verbose=self.verbose,
             callbacks=self.callbacks
@@ -415,11 +416,11 @@ class  Model():
         # print("metric_loss_per_batch: ", metric_loss_per_batch)
         # print("metric_accuracy_per_batch",metric_accuracy_per_batch)
 
-        for epoch in range(self.num_epochs):
-            info_epoch = [metric_accuracy_per_batch[epoch], metric_loss_per_batch[epoch], metric_val_accuracy[epoch],
-                          metric_val_loss[epoch]]
-            self.metrics.append(info_epoch)
-            print(info_epoch)
+        #for epoch in range(self.num_epochs):
+            #info_epoch = [metric_accuracy_per_batch[epoch], metric_loss_per_batch[epoch], metric_val_accuracy[epoch],
+            #              metric_val_loss[epoch]]
+            #self.metrics.append(info_epoch)
+            #print(info_epoch)
             # print(epoch)
 
 
