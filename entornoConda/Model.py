@@ -255,6 +255,69 @@ class  Model():
         print(f"Optimizador óptimo: {self.best_hyperparameters['optimizer']}")
 
     def assign_optimizer_with_params_to_model(self):
+        if self.optimizer_name == 'adamw':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,
+                                                      beta_1=self.optimizer_beta1,
+                                                      beta_2=self.optimizer_beta2)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+
+        if self.optimizer_name == 'adamax':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,
+                                                      beta_1=self.optimizer_beta1,
+                                                      beta_2=self.optimizer_beta2)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+
+        if self.optimizer_name == 'adafactor':
+            self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr)
+            print(f"----Parámetros del optimizador óptimos:")
+            print("Ningún parámetro tuneado")
+
+        if self.optimizer_name == 'adadelta':
+            self.optimizer_rho = self.best_hyperparameters['rho']
+            self.optimizer = tf.keras.optimizers.Adadelta(learning_rate = self.lr,
+                                                      rho= self.optimizer_rho)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Rho: {self.best_hyperparameters['rho']}")
+
+        if self.optimizer_name == 'adagrad':
+            self.optimizer = tf.keras.optimizers.Adagrad(learning_rate = self.lr)
+            print(f"----Parámetros del optimizador óptimos:")
+            print("Ningún parámetro tuneado")
+
+        if self.optimizer_name == 'ftrl':
+            self.optimizer = tf.keras.optimizers.Ftrl(learning_rate = self.lr)
+            print(f"----Parámetros del optimizador óptimos:")
+            print("Ningún parámetro tuneado")
+
+
+        if self.optimizer_name == 'lion':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,
+                                                      beta_1=self.optimizer_beta1,
+                                                      beta_2=self.optimizer_beta2)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+
+        if self.optimizer_name == 'lamb':
+            self.optimizer_beta1 = self.best_hyperparameters['beta1']
+            self.optimizer_beta2 = self.best_hyperparameters['beta2']
+            self.optimizer = tf.keras.optimizers.Lamb(learning_rate = self.lr,
+                                                      beta_1=self.optimizer_beta1,
+                                                      beta_2=self.optimizer_beta2)
+            print(f"----Parámetros del optimizador óptimos:")
+            print(f"Beta1: {self.best_hyperparameters['beta1']}")
+            print(f"Beta2: {self.best_hyperparameters['beta2']}")
+
         if self.optimizer_name == 'adam':
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
             self.optimizer_beta2 = self.best_hyperparameters['beta2']
@@ -391,12 +454,39 @@ class  Model():
         nesterov_choice = hp.Boolean("nesterov", default=True)
         beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
         beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
+        rho_choice = np.float32(hp.Float("rho", min_value=0.7, max_value=0.95))
+
+        if self.optimizer_name == 'adamw':
+            self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+
+        if self.optimizer_name == 'adamax':
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+
+        if self.optimizer_name == 'adafactor':
+            #Solo tiene epsilons, no merece pena?
+            self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr)
+
+        if self.optimizer_name == 'adadelta':
+            self.optimizer = tf.keras.optimizers.Adadelta(learning_rate = self.lr,rho=rho_choice)
+
+        if self.optimizer_name == 'adagrad':
+            #Merece la pena finetunear algun hiperparametro aqui?
+            self.optimizer = tf.keras.optimizers.Adagrad(learning_rate = self.lr)
+
+        if self.optimizer_name == 'ftrl':
+            #Merece la pena finetunear algun hiperparametro aqui?
+            self.optimizer = tf.keras.optimizers.Ftrl(learning_rate = self.lr)
+
+        if self.optimizer_name == 'lion':
+            self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+
+        if self.optimizer_name == 'lamb':
+            self.optimizer = tf.keras.optimizers.Lamb(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'adam':
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'rmsprop':
-            rho_choice= np.float32(hp.Float("rho",min_value=0.7,max_value=0.95))
             momentum_choice= np.float32(hp.Float("momentum",min_value=0.0,max_value=0.9))
             self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice)
 
