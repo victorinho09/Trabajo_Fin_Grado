@@ -11,10 +11,12 @@ from funciones_auxiliares import get_num_epochs_train, dividir_array
 
 class  Model():
     def __init__(self,X_train,y_train,log_dir,batch_size,num_batches,X_val=None,y_val=None,
-                 num_hidden_layers: int = None,
-                 num_neurons_per_hidden: int = None,
-                 optimizers_list: list = None,
-                 hidden_activation_function_list: list = None,
+                 user_min_num_hidden_layers: int = None,
+                 user_max_num_hidden_layers: int = None,
+                 user_min_num_neurons_per_hidden: int = None,
+                 user_max_num_neurons_per_hidden: int = None,
+                 user_optimizers_list: list = None,
+                 user_hidden_activation_function_list: list = None,
                  ):
 
         global_batch_logger = GlobalBatchLogger(log_dir)
@@ -40,12 +42,42 @@ class  Model():
         self.log_dir = log_dir
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
 
-        #atributo del metodo search del tuner
-        self.num_epochs_tuner = 5
-
         self.num_batches = num_batches
         self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
         self.num_epochs_tuner = self.num_epochs
+
+        self.history = None #No obtendrá valor hasta que se entrene el modelo
+        self.num_hidden_layers = None
+        self.lr = None
+        self.num_neurons_per_hidden = 10
+
+        self.initialize_optimizer_variables(user_optimizers_list)
+
+        self.initialize_hidden_function_variables(user_hidden_activation_function_list)
+
+        self.output_activation_function = 'softmax'
+        self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
+        self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
+
+        self.min_num_neurons_per_hidden = 30
+        self.threshold_num_neurons_per_hidden = 100 #numero de features a partir del cual la búsqueda del número se hace logarítmica
+
+        self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_neurons_per_hidden)
+
+        self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
+        self.max_lr = 1e-2
+
+        self.initialize_tuner_variables()
+
+        self.bayesian_opt_tuner = None
+        self.best_hyperparameters = None
+        self.metrics = []
+        self.model = None
+        self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+
+
+
+    def initialize_optimizer_variables(self,user_optimizers_list):
 
         #Traduccion de los optimizadores disponibles por tf.keras
         self.available_optimizers = {
@@ -63,48 +95,8 @@ class  Model():
             "lamb": tf.keras.optimizers.Lamb
         }
 
-        #Traduccion de las funciones de activacion disponibles por tf.keras
-        self.available_hidden_activation_functions = {
-            #"celu": tf.keras.activations.celu, NO HAY SOPORTE DESDE TF.KERAS, solo desde keras. ¿tf.nn.ceu? -> no me la detecta
-            #"glu": tf.keras.activations.glu,
-            #"hard_shrink": tf.keras.activations.hard_shrink,
-            #"hard_sigmoid": tf.keras.activations.hard_sigmoid,
-            "hard_silu": tf.keras.activations.hard_silu,
-            #"hard_tanh": tf.keras.activations.hard_tanh,
-            "leaky_relu": tf.keras.activations.leaky_relu,
-            #"log_sigmoid": tf.keras.activations.log_sigmoid,
-            "log_softmax": tf.keras.activations.log_softmax,
-            "mish": tf.keras.activations.mish,
-            "relu6": tf.keras.activations.relu6,
-            "relu": tf.keras.activations.relu,
-            "sigmoid": tf.keras.activations.sigmoid,
-            "softmax": tf.keras.activations.softmax,
-            "softplus": tf.keras.activations.softplus,
-            "softsign": tf.keras.activations.softsign,
-            #"soft_shrink": tf.keras.activations.soft_shrink,
-            "tanh": tf.keras.activations.tanh,
-            "selu": tf.keras.activations.selu,
-            "elu": tf.keras.activations.elu,
-            "exponential": tf.keras.activations.exponential,
-            "linear": tf.keras.activations.linear,
-            "gelu": tf.keras.activations.gelu,
-            "silu": tf.keras.activations.silu,
-            "swish": tf.keras.activations.silu,
-            #"sparse_plus": tf.keras.activations.sparse_plus,
-            #"sparsemax": tf.keras.activations.sparsemax,
-            #"squareplus": tf.keras.activations.squareplus,
-            #"tanh_shrink": tf.keras.activations.tanh_shrink,
-            #"threshold": tf.keras.activations.threshold
-        }
-
-
-        self.history = None #No obtendrá valor hasta que se entrene el modelo
-        self.num_hidden_layers = None
-        self.lr = None
-        self.num_neurons_per_hidden = 10
-
-        if optimizers_list:
-            optimizers_list_lowercase = [s.lower() for s in optimizers_list]
+        if user_optimizers_list:
+            optimizers_list_lowercase = [s.lower() for s in user_optimizers_list]
             self.optimizers_list =  optimizers_list_lowercase
         else:
             self.optimizers_list = ['adam', 'nadam', 'rmsprop','sgd']
@@ -116,42 +108,79 @@ class  Model():
         self.optimizer_rho = None
         self.optimizer_nesterov = None
         self.optimizer_momentum= None
-        self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
-        #Se comprueba si el parametro opcional viene dado o no
-        if hidden_activation_function_list:
-            #Se pasan a minúsculas todas las strings de la lista
-            hidden_activation_function_list_lowercase = [s.lower() for s in hidden_activation_function_list]
+    def initialize_hidden_function_variables(self,user_hidden_activation_function_list):
+        # Traduccion de las funciones de activacion disponibles por tf.keras
+        self.available_hidden_activation_functions = {
+            # "celu": tf.keras.activations.celu, NO HAY SOPORTE DESDE TF.KERAS, solo desde keras. ¿tf.nn.ceu? -> no me la detecta
+            # "glu": tf.keras.activations.glu,
+            # "hard_shrink": tf.keras.activations.hard_shrink,
+            # "hard_sigmoid": tf.keras.activations.hard_sigmoid,
+            "hard_silu": tf.keras.activations.hard_silu,
+            # "hard_tanh": tf.keras.activations.hard_tanh,
+            "leaky_relu": tf.keras.activations.leaky_relu,
+            # "log_sigmoid": tf.keras.activations.log_sigmoid,
+            "log_softmax": tf.keras.activations.log_softmax,
+            "mish": tf.keras.activations.mish,
+            "relu6": tf.keras.activations.relu6,
+            "relu": tf.keras.activations.relu,
+            "sigmoid": tf.keras.activations.sigmoid,
+            "softmax": tf.keras.activations.softmax,
+            "softplus": tf.keras.activations.softplus,
+            "softsign": tf.keras.activations.softsign,
+            # "soft_shrink": tf.keras.activations.soft_shrink,
+            "tanh": tf.keras.activations.tanh,
+            "selu": tf.keras.activations.selu,
+            "elu": tf.keras.activations.elu,
+            "exponential": tf.keras.activations.exponential,
+            "linear": tf.keras.activations.linear,
+            "gelu": tf.keras.activations.gelu,
+            "silu": tf.keras.activations.silu,
+            "swish": tf.keras.activations.silu,
+            # "sparse_plus": tf.keras.activations.sparse_plus,
+            # "sparsemax": tf.keras.activations.sparsemax,
+            # "squareplus": tf.keras.activations.squareplus,
+            # "tanh_shrink": tf.keras.activations.tanh_shrink,
+            # "threshold": tf.keras.activations.threshold
+        }
+
+        # Se comprueba si el parametro opcional viene dado o no
+        if user_hidden_activation_function_list:
+            # Se pasan a minúsculas todas las strings de la lista
+            hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
             self.hidden_activation_function_list = hidden_activation_function_list_lowercase
         else:
             self.hidden_activation_function_list = ['relu', 'leaky_relu', 'elu', 'silu']
-        self.hidden_activation_function = self.available_hidden_activation_functions[self.hidden_activation_function_list[0]]
+        self.hidden_activation_function = self.available_hidden_activation_functions[
+            self.hidden_activation_function_list[0]]
 
-        self.output_activation_function = 'softmax'
-        self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
-        self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
-
-        self.min_num_neurons_per_hidden = 30
-        self.threshold_num_neurons_per_hidden = 100 #numero de features a partir del cual la búsqueda del número se hace logarítmica
-
-        self.min_num_hidden_layers = 2
-        self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1]))) #sqroot(nº features)
-
-        self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
-        self.max_lr = 1e-2
-
+    def initialize_tuner_variables(self):
         # atributos de parametros pasados al tuner
         self.max_trials = 15
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
-        self.directory = "bayesian_tuner"
+        self.directory = "autotune"
 
-        self.bayesian_opt_tuner = None
-        self.best_hyperparameters = None
-        self.metrics = []
-        self.model = None
-
+    def initialize_num_hidden_layers_variables(self,user_min_num_hidden_layers=None,user_max_num_hidden_layers=None):
+        if user_min_num_hidden_layers is not None:
+            if user_max_num_hidden_layers is not None:
+                #Se ha recibido min y max hidden layers por parametro
+                self.min_num_hidden_layers = user_min_num_hidden_layers
+                self.max_num_hidden_layers = user_max_num_hidden_layers
+            else:
+                #solo se ha recibido min hidden layers por parametro
+                self.min_num_hidden_layers = user_min_num_hidden_layers
+                self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
+        else:
+            if user_max_num_hidden_layers is not None:
+                #Solo se ha recibido max hidden layers por parametro
+                self.max_num_hidden_layers = user_max_num_hidden_layers
+                self.min_num_hidden_layers = 2
+            else:
+                #No se han recibido ningun hidden layers por parametro
+                self.min_num_hidden_layers = 2
+                self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
 
     def autotune(self):
 
