@@ -62,7 +62,7 @@ class  Model():
         self.min_num_neurons_per_hidden = 30
         self.threshold_num_neurons_per_hidden = 100 #numero de features a partir del cual la búsqueda del número se hace logarítmica
 
-        self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_neurons_per_hidden)
+        self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_hidden_layers)
 
         self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
         self.max_lr = 1e-2
