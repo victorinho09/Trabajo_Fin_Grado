@@ -5,3 +5,7 @@
 
 -Tanto en seleccion de numero de neurons como en numero de capas, poner sampling= log en caso de mucha distancia entre min y max?
 -A veces, si se escoge sgd peta, dice que momentum no puede ser mayor que 1
+-Mirar git, que subir y que no
+
+-Para automatizar proceso. ¿Dejar información en un fichero que resuma precisión y loss para cada conjunto final de datos, es decir, para 100 epocas -> ver como son los resultados. Luego para 1000 y luego para 10000?
+-AL llamar a Model ¿Pedir numero de batches obligatorio, o numero de epocas, o ninguno de ellos y fijar valor default?

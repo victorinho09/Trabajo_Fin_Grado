@@ -7,10 +7,10 @@ from sklearn.model_selection import train_test_split
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
-from funciones_auxiliares import get_num_epochs_train, dividir_array
+from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches,X_val=None,y_val=None,
+    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,user_num_epochs=None,
                  user_min_num_hidden_layers: int = None,
                  user_max_num_hidden_layers: int = None,
                  user_min_num_neurons_per_hidden: int = None,
@@ -43,8 +43,13 @@ class  Model():
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
 
         self.num_batches = num_batches
-        self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
+        if user_num_epochs is not None:
+            self.num_epochs = user_num_epochs
+            self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=batch_size)
+        else:
+            self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
         self.num_epochs_tuner = self.num_epochs
+        # print(f"Numero de epocas: {self.num_epochs_tuner}")
 
         self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_hidden_layers = None
@@ -536,6 +541,7 @@ class  Model():
         beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
         beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
         rho_choice = np.float32(hp.Float("rho", min_value=0.7, max_value=0.95))
+        self.lr = float(self.lr)
 
         if self.optimizer_name == 'adamw':
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
@@ -575,7 +581,7 @@ class  Model():
             self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'sgd':
-            momentum_choice = np.float32(hp.Float("momentum",min_value=0.7, max_value=0.95))
+            momentum_choice = float(hp.Float("momentum",min_value=0.7, max_value=0.95))
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice)
 
         model = self.create_and_compile_model()

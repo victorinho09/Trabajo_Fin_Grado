@@ -45,14 +45,17 @@ def get_num_epochs_train(
         desired_batches,
         validation_split_value
 ):
-    total_samples =  (1-validation_split_value) * X_train_scaled.shape[0]
-    # si 1 epoca es una vuelta entera a todos los samples. Y cada batch ejecuta batch_size instancias
-    num_batches_per_epoch = math.ceil(total_samples / batch_size)
+    num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=validation_split_value,filas=X_train_scaled.shape[0],batch_size=batch_size)
     if (num_batches_per_epoch > desired_batches):
         print(
             "No se llega a ejecutar 1 epoca entera --> numEpochs = 0????")  # preguntar: ¿Queremos comparar ejecuciones con las epochs?
     numEpochs = math.ceil(desired_batches / num_batches_per_epoch)
     return numEpochs, num_batches_per_epoch
+
+def get_num_batches_per_epoch(validation_split_value,filas,batch_size):
+    total_samples =  ((1-validation_split_value) * filas)
+    # si 1 epoca es una vuelta entera a todos los samples. Y cada batch ejecuta batch_size instancias
+    return math.ceil(total_samples / batch_size)
 
 def compute_steps_for_batches(
     desired_batches,
