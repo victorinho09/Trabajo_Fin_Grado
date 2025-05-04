@@ -3,13 +3,13 @@ from ucimlrepo import fetch_ucirepo
 
 from entrenamiento import train_and_evaluate
 
-# data_iris = fetch_ucirepo(id=53).data #clasificacion
-# print("Iris dataset cargado")
-# train_and_evaluate(data_iris,"iris")
+data_iris = fetch_ucirepo(id=53).data #clasificacion
+print("Iris dataset cargado")
+train_and_evaluate(data_iris,"iris")
 
-data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
-print("Heart_disease dataset cargado")
-train_and_evaluate(data_heart_disease, "heart_disease")
+# data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
+# print("Heart_disease dataset cargado")
+# train_and_evaluate(data_heart_disease, "heart_disease")
 
 # data_adult = fetch_ucirepo(id=2).data #clasificacion
 # print("Adult dataset cargado")
