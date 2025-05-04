@@ -59,8 +59,7 @@ class  Model():
         self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
         self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
 
-        self.min_num_neurons_per_hidden = 30
-        self.threshold_num_neurons_per_hidden = 100 #numero de features a partir del cual la búsqueda del número se hace logarítmica
+        self.initialize_num_neurons_per_hidden_variables(user_min_num_neurons_per_hidden,user_max_num_neurons_per_hidden)
 
         self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_hidden_layers)
 
@@ -75,9 +74,37 @@ class  Model():
         self.model = None
         self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
+    def initialize_num_neurons_per_hidden_variables(self,user_min_num_neurons_per_hidden=None,user_max_num_neurons_per_hidden=None):
+        self.min_num_neurons_per_hidden = 30
+        self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
+        self.use_user_param_values = False
+        self.max_num_neurons_per_hidden = None
 
+        if user_min_num_neurons_per_hidden is not None:
+            if user_max_num_neurons_per_hidden is not None:
+                #Se ha recibido min y max neurons per hidden layers por parametro
+                #Se comprueba que el mínimo no es mayor que el máximo
+                if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+                    self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                    self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                    self.use_user_param_values = True
+                else:
+                    print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
 
-    def initialize_optimizer_variables(self,user_optimizers_list):
+            else:
+                #solo se ha recibido min neurons per hidden layers por parametro
+                self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+
+        else:
+            if user_max_num_neurons_per_hidden is not None:
+                #Solo se ha recibido max neurons per hidden layers por parametro
+                if self.min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+                    self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+
+                else:
+                    print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
+
+    def initialize_optimizer_variables(self,user_optimizers_list = None):
 
         #Traduccion de los optimizadores disponibles por tf.keras
         self.available_optimizers = {
@@ -109,7 +136,7 @@ class  Model():
         self.optimizer_nesterov = None
         self.optimizer_momentum= None
 
-    def initialize_hidden_function_variables(self,user_hidden_activation_function_list):
+    def initialize_hidden_function_variables(self,user_hidden_activation_function_list = None):
         # Traduccion de las funciones de activacion disponibles por tf.keras
         self.available_hidden_activation_functions = {
             # "celu": tf.keras.activations.celu, NO HAY SOPORTE DESDE TF.KERAS, solo desde keras. ¿tf.nn.ceu? -> no me la detecta
@@ -163,24 +190,32 @@ class  Model():
         self.directory = "autotune"
 
     def initialize_num_hidden_layers_variables(self,user_min_num_hidden_layers=None,user_max_num_hidden_layers=None):
+        self.min_num_hidden_layers = 2
+        self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
+
         if user_min_num_hidden_layers is not None:
             if user_max_num_hidden_layers is not None:
                 #Se ha recibido min y max hidden layers por parametro
-                self.min_num_hidden_layers = user_min_num_hidden_layers
-                self.max_num_hidden_layers = user_max_num_hidden_layers
+                if user_min_num_hidden_layers < user_max_num_hidden_layers:
+                    self.min_num_hidden_layers = user_min_num_hidden_layers
+                    self.max_num_hidden_layers = user_max_num_hidden_layers
+
+                else:
+                    print(f"El valor máximo introducido({user_max_num_hidden_layers}) es menor que el mínimo introducido({user_min_num_hidden_layers}). Se cogerán valores por defecto.")
+
             else:
                 #solo se ha recibido min hidden layers por parametro
-                self.min_num_hidden_layers = user_min_num_hidden_layers
-                self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
+                if user_min_num_hidden_layers < self.max_num_hidden_layers:
+                    self.min_num_hidden_layers = user_min_num_hidden_layers
+                else:
+                    print(f"Mínimo de capas ocultas introducido ({user_min_num_hidden_layers}) es mayor que el máximo de capas por defecto ({self.max_num_hidden_layers}). Se cogerán valores por defecto")
         else:
             if user_max_num_hidden_layers is not None:
                 #Solo se ha recibido max hidden layers por parametro
-                self.max_num_hidden_layers = user_max_num_hidden_layers
-                self.min_num_hidden_layers = 2
-            else:
-                #No se han recibido ningun hidden layers por parametro
-                self.min_num_hidden_layers = 2
-                self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
+                if user_max_num_hidden_layers > self.min_num_hidden_layers:
+                    self.max_num_hidden_layers = user_max_num_hidden_layers
+                else:
+                    print(f"Máximo de capas ocultas introducido ({user_max_num_hidden_layers}) es menor que el mínimo por defecto ({self.min_num_hidden_layers}). Se cogerán valores por defecto")
 
     def autotune(self):
 
@@ -455,13 +490,30 @@ class  Model():
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[self.optimizers_list[0]](learning_rate=self.lr)
 
-        if self.X_train.shape[1] <= self.min_num_neurons_per_hidden:
-            self.num_neurons_per_hidden = self.min_num_neurons_per_hidden  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
-        else:
-            if self.X_train.shape[1] > self.threshold_num_neurons_per_hidden:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1],sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+        if self.use_user_param_values:
+            # Si hay muchas features o se van a poner muchas neuronas, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+            if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
+                                                     min_value=self.min_num_neurons_per_hidden,
+                                                     max_value=self.max_num_neurons_per_hidden,
+                                                     sampling='log')
             else:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.X_train.shape[1])
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
+                                                     min_value=self.min_num_neurons_per_hidden,
+                                                     max_value=self.max_num_neurons_per_hidden)
+        else:
+            #Se comprueba si el máximo tiene un valor o se dejó a None al inicializar variables de num_neurons_per_hidden
+            if self.max_num_neurons_per_hidden is None:
+                #Se traduce a que el max es X_train.shape[1]
+                self.max_num_neurons_per_hidden = self.X_train.shape[1]
+
+            if self.max_num_neurons_per_hidden <= self.min_num_neurons_per_hidden:
+                self.num_neurons_per_hidden = self.min_num_neurons_per_hidden  # SI EL NUMERO DE FEATURES ES INFERIOR A 30, COGER 30 NEURONAS POR CAPA.
+            else:
+                if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
+                    self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden,sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+                else:
+                    self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden)
 
         model = self.create_and_compile_model()
         return model
@@ -526,7 +578,6 @@ class  Model():
             momentum_choice = np.float32(hp.Float("momentum",min_value=0.7, max_value=0.95))
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice)
 
-        #if self.optimizer_name == ''
         model = self.create_and_compile_model()
         return model
 
