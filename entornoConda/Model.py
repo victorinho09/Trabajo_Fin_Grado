@@ -38,7 +38,7 @@ class  Model():
         self.validation_split = 0.2  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
         self.shuffle = True  # Para que baraje los datos antes de la división del val set
         self.batch_size = batch_size
-        self.verbose = 0
+        self.verbose = 1
         self.log_dir = log_dir
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
 
