@@ -10,3 +10,5 @@
 -Para automatizar proceso. ¿Dejar información en un fichero que resuma precisión y loss para cada conjunto final de datos, es decir, para 100 epocas -> ver como son los resultados. Luego para 1000 y luego para 10000?
 -AL llamar a Model ¿Pedir numero de batches obligatorio o numero de epocas o ninguno de ellos y fijar valor default?
 -Salen convergence warnings por la lr al haber bastantes epocas
+
+PONER BIEN EL GIT
