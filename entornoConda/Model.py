@@ -301,7 +301,7 @@ class  Model():
 
     def search(self):
         #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
-        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=0)
+        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=self.verbose)
         self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
@@ -595,7 +595,7 @@ class  Model():
             validation_split=self.validation_split,
             # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
             shuffle=self.shuffle,
-            epochs= 50,
+            epochs= self.num_epochs,
             batch_size=self.batch_size,
             verbose=self.verbose,
             callbacks=self.callbacks
