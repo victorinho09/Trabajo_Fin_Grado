@@ -10,13 +10,13 @@ from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,user_num_epochs=None,
+    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,user_num_epochs=None,user_max_trials= None,
                  user_min_num_hidden_layers: int = None,
                  user_max_num_hidden_layers: int = None,
                  user_min_num_neurons_per_hidden: int = None,
                  user_max_num_neurons_per_hidden: int = None,
                  user_optimizers_list: list = None,
-                 user_hidden_activation_function_list: list = None,
+                 user_hidden_activation_function_list: list = None
                  ):
 
         global_batch_logger = GlobalBatchLogger(log_dir)
@@ -71,7 +71,7 @@ class  Model():
         self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
         self.max_lr = 1e-2
 
-        self.initialize_tuner_variables()
+        self.initialize_tuner_variables(user_max_trials)
 
         self.bayesian_opt_tuner = None
         self.best_hyperparameters = None
@@ -186,9 +186,12 @@ class  Model():
         self.hidden_activation_function = self.available_hidden_activation_functions[
             self.hidden_activation_function_list[0]]
 
-    def initialize_tuner_variables(self):
+    def initialize_tuner_variables(self,user_max_trials=None):
         # atributos de parametros pasados al tuner
-        self.max_trials = 15
+        if user_max_trials is not None:
+            self.max_trials = user_max_trials
+        else:
+            self.max_trials = 15
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
         self.objective = "val_accuracy"
         self.overwrite = True
@@ -297,7 +300,7 @@ class  Model():
         self.assign_optimizer_with_params_to_model()
 
         #al fin, se construye el modelo final
-        self.model = self.create_and_compile_definitive_model()
+        self.model = self.create_and_compile_model()
 
     def search(self):
         #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
@@ -433,22 +436,6 @@ class  Model():
         self.num_neurons_per_hidden = self.best_hyperparameters['num_neurons_per_hidden']
         print(f"Número de neuronas por capa oculta óptimo: {self.best_hyperparameters['num_neurons_per_hidden']}")
 
-    def create_and_compile_definitive_model(self):
-
-        model = tf.keras.Sequential()
-        model.add(tf.keras.layers.Input(self.num_neurons_input_layer))
-
-        # Se añaden el resto de capas del modelo
-        for i in range(self.num_hidden_layers):
-            model.add(tf.keras.layers.Dense(self.num_neurons_per_hidden, activation=self.hidden_activation_function))
-
-        # Se añade capa de salida. La función de activación corresponde al último
-        model.add(tf.keras.layers.Dense(self.num_neurons_output_layer, activation=self.output_activation_function))
-
-        # Compiling the model. Hace falta especificar la métrica accuracy para que el objeto history del model.fit contenga tal métrica
-        model.compile(optimizer=self.optimizer, loss=self.loss, metrics=['accuracy'])
-        return model
-
 
     def create_and_compile_model(self):
         model = tf.keras.Sequential()
@@ -473,7 +460,6 @@ class  Model():
 
         #Se traduce la funcion de activacion de string -> funcion de tf.keras
         self.hidden_activation_function = self.available_hidden_activation_functions[hidden_activation_function_choice]
-
         model = self.create_and_compile_model()
         return model
 
@@ -630,4 +616,8 @@ class  Model():
 
 
     def evaluate(self,X_test_scaled, y_test_encoded):
-        self.model.evaluate(X_test_scaled, y_test_encoded)
+        #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
+        return self.model.evaluate(X_test_scaled, y_test_encoded)
+
+    def get_final_hyperparams(self):
+        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers]
