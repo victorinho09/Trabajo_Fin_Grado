@@ -15,6 +15,7 @@ data_iris = fetch_ucirepo(id=53).data  # clasificacion
 #Al principio de la prueba se borra el fichero que contiene infor de un dataset de otra prueba anterior
 borrar_fichero_pruebas_internas(nombre_fichero_dataset)
 
+########PROBAR CON EL NUMERO DE EPOCAS Y TRIALS INDICADO POR ABRAHAM EN EL CORREO A VER QUE TAL
 for vueltas_num_epoch in range(10):
     for vueltas_max_trial in range(10):
         ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10*(vueltas_num_epoch + 1), 5 * (vueltas_max_trial + 1))
