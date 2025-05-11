@@ -619,5 +619,5 @@ class  Model():
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
         return self.model.evaluate(X_test_scaled, y_test_encoded)
 
-    def get_final_hyperparams(self):
-        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers]
+    def get_final_hyperparams_and_params(self):
+        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs,self.max_trials]

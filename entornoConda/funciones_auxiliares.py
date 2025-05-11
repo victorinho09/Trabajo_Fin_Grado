@@ -1,4 +1,30 @@
 import math
+import os
+
+def borrar_fichero_pruebas_internas(nombre_fichero):
+    directorio_resultados_pruebas_internas = "./resultados_pruebas_internas"
+    ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,nombre_fichero)
+
+    if os.path.exists(ruta_fichero):
+        os.remove(ruta_fichero)
+
+
+def pintar_resultado_en_fichero(datos_entrenamiento):
+    directorio_resultados_pruebas_internas = "./resultados_pruebas_internas"
+    os.makedirs(directorio_resultados_pruebas_internas, exist_ok=True)
+    ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,datos_entrenamiento["nombre_dataset"] )
+
+    if os.path.exists(ruta_fichero):
+        with open(ruta_fichero, "a") as f:
+            for i in range(len(datos_entrenamiento)):
+                print(f"{list(datos_entrenamiento.keys())[i]} = {datos_entrenamiento[list(datos_entrenamiento.keys())[i]]}", file=f)
+            print("####################################")
+    else:
+        # Con w, se sobreescribe el fichero entero
+        with open(ruta_fichero, "w") as f:
+            for i in range(len(datos_entrenamiento)):
+                print(f"{list(datos_entrenamiento.keys())[i]} = {datos_entrenamiento[list(datos_entrenamiento.keys())[i]]}", file=f)
+            print("####################################")
 
 def dividir_array(arr, n):
     """

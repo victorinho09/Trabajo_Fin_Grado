@@ -9,5 +9,18 @@ def train_and_evaluate(dataset,nombre_fichero_info_dataset, num_batches=None, lo
     model.autotune()
     model.train()
     loss,precision=model.evaluate(X_test_scaled, y_test_encoded)
-    lista_hiperparams = model.get_final_hyperparams()
-    return [nombre_fichero_info_dataset,user_num_epochs,user_max_trials,loss,precision] + lista_hiperparams
+    hiperparams_and_params = model.get_final_hyperparams_and_params()
+
+    return {
+        "nombre_dataset": nombre_fichero_info_dataset,
+        "loss": loss,
+        "precision": precision,
+        "lr" : hiperparams_and_params[0],
+        "optimizador" : hiperparams_and_params[1],
+        "funcion_activacion" : hiperparams_and_params[2],
+        "numero_neuronas_por_capa_oculta" : hiperparams_and_params[3],
+        "numero_capas_ocultas" : hiperparams_and_params[4],
+        "numero_epocas" : hiperparams_and_params[5],
+        "max_trials" : hiperparams_and_params[6],
+
+    }
