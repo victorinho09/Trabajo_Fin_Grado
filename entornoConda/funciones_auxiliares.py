@@ -18,13 +18,13 @@ def pintar_resultado_en_fichero(datos_entrenamiento):
         with open(ruta_fichero, "a") as f:
             for i in range(len(datos_entrenamiento)):
                 print(f"{list(datos_entrenamiento.keys())[i]} = {datos_entrenamiento[list(datos_entrenamiento.keys())[i]]}", file=f)
-            print("####################################")
+            print("####################################", file=f)
     else:
         # Con w, se sobreescribe el fichero entero
         with open(ruta_fichero, "w") as f:
             for i in range(len(datos_entrenamiento)):
                 print(f"{list(datos_entrenamiento.keys())[i]} = {datos_entrenamiento[list(datos_entrenamiento.keys())[i]]}", file=f)
-            print("####################################")
+            print("####################################", file=f)
 
 def dividir_array(arr, n):
     """

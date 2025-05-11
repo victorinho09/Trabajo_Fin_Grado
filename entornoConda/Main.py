@@ -1,6 +1,5 @@
-
 from ucimlrepo import fetch_ucirepo
-
+import tensorflow as tf
 from entrenamiento import train_and_evaluate
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
