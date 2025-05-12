@@ -12,6 +12,9 @@ class EpochCumulativeLogger(tf.keras.callbacks.Callback):
         self.epoch_count = 0
 
     def on_train_begin(self, logs=None):
+        self.epoch_count = 0
+        self.cumulative_loss = 0.0
+        self.cumulative_accuracy = 0.0
         # Creamos un writer para logs de TensorBoard
         self.writer = tf.summary.create_file_writer(self.log_dir)
         self.writer.set_as_default()

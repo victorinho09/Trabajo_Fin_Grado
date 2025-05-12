@@ -10,4 +10,7 @@
 -Para automatizar proceso. ¿Dejar información en un fichero que resuma precisión y loss para cada conjunto final de datos, es decir, para 100 epocas -> ver como son los resultados. Luego para 1000 y luego para 10000?
 -AL llamar a Model ¿Pedir numero de batches obligatorio o numero de epocas o ninguno de ellos y fijar valor default?
 
-PONER BIEN EL GIT
+Epoch 14/1000
+3/3 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.3266 - loss: 1.1470 - val_accuracy: 0.3889 - val_loss: 1.1266
+Epoch 15/1000
+2025-05-12 11:14:45.734814: F external/local_tsl/tsl/lib/monitoring/counter.h:205] Check failed: 0 <= step (0 vs. -3222)Must not decrement cumulative metrics.

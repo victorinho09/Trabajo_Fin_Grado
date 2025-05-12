@@ -15,6 +15,7 @@ class GlobalBatchLogger(tf.keras.callbacks.Callback):
         self.batch_accuracy_acum = []
 
     def on_train_begin(self, logs=None):
+        self.global_step = 0
         # Creamos el escritor de resúmenes de TensorFlow al inicio del entrenamiento
         self.writer = tf.summary.create_file_writer(self.log_dir)
         self.writer.set_as_default()
@@ -42,9 +43,12 @@ class GlobalBatchLogger(tf.keras.callbacks.Callback):
             self.cumulative_accuracy += batch_acc * batch_size
             self.total_samples += batch_size
 
-            # Calculamos la media acumulada (hasta este batch)
-            avg_cumulative_loss = self.cumulative_loss / self.total_samples
-            avg_cumulative_accuracy = self.cumulative_accuracy / self.total_samples
+            if self.total_samples > 0:
+                avg_cumulative_loss = self.cumulative_loss / self.total_samples
+                avg_cumulative_accuracy = self.cumulative_accuracy / self.total_samples
+            else:
+                avg_cumulative_loss = 0.0
+                avg_cumulative_accuracy = 0.0
 
             # Registramos exclusivamente la métrica acumulada
             tf.summary.scalar('cumulative_loss', data=avg_cumulative_loss, step=self.global_step)
