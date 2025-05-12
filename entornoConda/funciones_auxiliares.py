@@ -1,12 +1,12 @@
 import math
 import os
 
-def borrar_fichero_pruebas_internas(nombre_fichero):
-    directorio_resultados_pruebas_internas = "./resultados_pruebas_internas"
-    ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,nombre_fichero)
-
-    if os.path.exists(ruta_fichero):
-        os.remove(ruta_fichero)
+# def borrar_fichero_pruebas_internas(nombre_fichero):
+#     directorio_resultados_pruebas_internas = "./resultados_pruebas_internas"
+#     ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,nombre_fichero)
+#
+#     if os.path.exists(ruta_fichero):
+#         os.remove(ruta_fichero)
 
 
 def pintar_resultado_en_fichero(datos_entrenamiento):

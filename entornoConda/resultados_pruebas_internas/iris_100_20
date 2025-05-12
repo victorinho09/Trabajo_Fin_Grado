@@ -1,0 +1,11 @@
+nombre_dataset = iris
+loss = 0.4205965995788574
+precision = 0.9333333373069763
+lr = 0.029023271037401453
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 4
+numero_epocas = 100
+max_trials = 20
+####################################

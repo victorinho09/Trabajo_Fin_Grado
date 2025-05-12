@@ -1,6 +1,6 @@
 from entrenamiento import train_and_evaluate
 from ucimlrepo import fetch_ucirepo
-from funciones_auxiliares import pintar_resultado_en_fichero, borrar_fichero_pruebas_internas
+from funciones_auxiliares import pintar_resultado_en_fichero
 
 
 def ejecutar_prueba_interna(data,nombre_fichero_dataset,user_num_epochs,user_max_trials):
@@ -11,9 +11,6 @@ def ejecutar_prueba_interna(data,nombre_fichero_dataset,user_num_epochs,user_max
 
 nombre_fichero_dataset = "iris"
 data_iris = fetch_ucirepo(id=53).data  # clasificacion
-
-#Al principio de la prueba se borra el fichero que contiene infor de un dataset de otra prueba anterior
-borrar_fichero_pruebas_internas(nombre_fichero_dataset)
 
 ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 10)
 ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 20)

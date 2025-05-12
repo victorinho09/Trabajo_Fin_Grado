@@ -1,0 +1,11 @@
+nombre_dataset = iris
+loss = 0.23283997178077698
+precision = 0.9333333373069763
+lr = 0.007764298849012305
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 2
+numero_epocas = 100
+max_trials = 40
+####################################
