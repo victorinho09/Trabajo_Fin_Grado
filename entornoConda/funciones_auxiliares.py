@@ -12,7 +12,8 @@ def borrar_fichero_pruebas_internas(nombre_fichero):
 def pintar_resultado_en_fichero(datos_entrenamiento):
     directorio_resultados_pruebas_internas = "./resultados_pruebas_internas"
     os.makedirs(directorio_resultados_pruebas_internas, exist_ok=True)
-    ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,datos_entrenamiento["nombre_dataset"] )
+    ruta = f"{datos_entrenamiento['nombre_dataset']}_{datos_entrenamiento['numero_epocas']}_{datos_entrenamiento['max_trials']}"
+    ruta_fichero = os.path.join(directorio_resultados_pruebas_internas,ruta )
 
     if os.path.exists(ruta_fichero):
         with open(ruta_fichero, "a") as f:
