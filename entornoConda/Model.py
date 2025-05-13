@@ -1,3 +1,5 @@
+import time
+
 import keras_tuner as kt
 import math
 
@@ -19,9 +21,9 @@ class  Model():
                  user_hidden_activation_function_list: list = None
                  ):
 
-        global_batch_logger = GlobalBatchLogger(log_dir)
-        global_epoch_logger = EpochCumulativeLogger(log_dir)
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, update_freq='epoch')
+        global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
+        global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
 
         #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
         if  (X_val is None) or (y_val is None) :
@@ -124,7 +126,6 @@ class  Model():
             "adagrad": tf.keras.optimizers.Adagrad,
             "ftrl": tf.keras.optimizers.Ftrl,
             "lion": tf.keras.optimizers.Lion,
-            "lamb": tf.keras.optimizers.Lamb
         }
 
         if user_optimizers_list:
@@ -148,13 +149,10 @@ class  Model():
             # "glu": tf.keras.activations.glu,
             # "hard_shrink": tf.keras.activations.hard_shrink,
             # "hard_sigmoid": tf.keras.activations.hard_sigmoid,
-            "hard_silu": tf.keras.activations.hard_silu,
             # "hard_tanh": tf.keras.activations.hard_tanh,
             "leaky_relu": tf.keras.activations.leaky_relu,
             # "log_sigmoid": tf.keras.activations.log_sigmoid,
-            "log_softmax": tf.keras.activations.log_softmax,
             "mish": tf.keras.activations.mish,
-            "relu6": tf.keras.activations.relu6,
             "relu": tf.keras.activations.relu,
             "sigmoid": tf.keras.activations.sigmoid,
             "softmax": tf.keras.activations.softmax,
@@ -167,8 +165,8 @@ class  Model():
             "exponential": tf.keras.activations.exponential,
             "linear": tf.keras.activations.linear,
             "gelu": tf.keras.activations.gelu,
-            "silu": tf.keras.activations.silu,
-            "swish": tf.keras.activations.silu,
+            "silu": tf.keras.activations.swish,
+            "swish": tf.keras.activations.swish,
             # "sparse_plus": tf.keras.activations.sparse_plus,
             # "sparsemax": tf.keras.activations.sparsemax,
             # "squareplus": tf.keras.activations.squareplus,
@@ -374,16 +372,6 @@ class  Model():
             self.optimizer_beta1 = self.best_hyperparameters['beta1']
             self.optimizer_beta2 = self.best_hyperparameters['beta2']
             self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,
-                                                      beta_1=self.optimizer_beta1,
-                                                      beta_2=self.optimizer_beta2)
-            print(f"----Parámetros del optimizador óptimos:")
-            print(f"Beta1: {self.best_hyperparameters['beta1']}")
-            print(f"Beta2: {self.best_hyperparameters['beta2']}")
-
-        if self.optimizer_name == 'lamb':
-            self.optimizer_beta1 = self.best_hyperparameters['beta1']
-            self.optimizer_beta2 = self.best_hyperparameters['beta2']
-            self.optimizer = tf.keras.optimizers.Lamb(learning_rate = self.lr,
                                                       beta_1=self.optimizer_beta1,
                                                       beta_2=self.optimizer_beta2)
             print(f"----Parámetros del optimizador óptimos:")

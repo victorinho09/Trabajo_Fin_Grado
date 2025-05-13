@@ -12,17 +12,8 @@ def ejecutar_prueba_interna(data,nombre_fichero_dataset,user_num_epochs,user_max
 nombre_fichero_dataset = "iris"
 data_iris = fetch_ucirepo(id=53).data  # clasificacion
 
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 10)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 20)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 40)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 100)
+ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 150)
+ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 200)
+ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 100)
+ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 300)
 
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 1000, 10)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 1000, 20)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 1000, 40)
-ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 1000, 100)
-
-ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10000, 10)
-ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10000, 20)
-ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10000, 40)
-ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10000, 100)

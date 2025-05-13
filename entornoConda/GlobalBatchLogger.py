@@ -43,6 +43,7 @@ class GlobalBatchLogger(tf.keras.callbacks.Callback):
             self.cumulative_accuracy += batch_acc * batch_size
             self.total_samples += batch_size
 
+
             if self.total_samples > 0:
                 avg_cumulative_loss = self.cumulative_loss / self.total_samples
                 avg_cumulative_accuracy = self.cumulative_accuracy / self.total_samples
