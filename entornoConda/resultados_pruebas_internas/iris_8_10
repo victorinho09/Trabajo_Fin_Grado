@@ -1,0 +1,22 @@
+nombre_dataset = iris
+loss = 0.25954315066337585
+precision = 0.8666666746139526
+lr = 0.018757954447639218
+optimizador = nadam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 2
+numero_epocas = 8
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.808945894241333
+precision = 0.6333333253860474
+lr = 0.16137011218842093
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 4
+numero_epocas = 8
+max_trials = 10
+####################################

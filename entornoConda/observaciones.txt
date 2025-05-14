@@ -6,3 +6,7 @@ Epoch 14/1000
 3/3 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.3266 - loss: 1.1470 - val_accuracy: 0.3889 - val_loss: 1.1266
 Epoch 15/1000
 2025-05-12 11:14:45.734814: F external/local_tsl/tsl/lib/monitoring/counter.h:205] Check failed: 0 <= step (0 vs. -3222)Must not decrement cumulative metrics.
+
+poner bien la lr al cambiar de optimizador
+Revisar que cada iteracion de hiperparametros guarde bien el valor
+Validation accuracy deberia ser menos que la accuracy de entrenamiento por lo general

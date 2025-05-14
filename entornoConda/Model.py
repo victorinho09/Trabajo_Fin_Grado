@@ -25,17 +25,6 @@ class  Model():
         global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
         tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
 
-        #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
-        if  (X_val is None) or (y_val is None) :
-            #hacer split del train
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train, test_size=0.3) # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
-        else:
-            self.X_val= X_val
-            self.y_val= y_val
-            self.X_train = X_train
-            self.y_train = y_train
-        self.validation_data = (self.X_val,self.y_val)
-
         # atributos de parametros pasados al fit method de funcion train
         self.validation_split = 0.2  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
         self.shuffle = True  # Para que baraje los datos antes de la división del val set
@@ -43,6 +32,19 @@ class  Model():
         self.verbose = 1
         self.log_dir = log_dir
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
+
+        #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
+        if  (X_val is None) or (y_val is None) :
+            #hacer split del train
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train, test_size=self.validation_split) # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
+        else:
+            self.X_val= X_val
+            self.y_val= y_val
+            self.X_train = X_train
+            self.y_train = y_train
+        self.validation_data = (self.X_val,self.y_val)
+
+
 
         self.num_batches = num_batches
         if user_num_epochs is not None:
@@ -515,7 +517,6 @@ class  Model():
         beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
         beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
         rho_choice = np.float32(hp.Float("rho", min_value=0.7, max_value=0.95))
-        self.lr = float(self.lr)
 
         if self.optimizer_name == 'adamw':
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
