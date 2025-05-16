@@ -192,7 +192,16 @@ class  Model():
             self.max_trials = user_max_trials
         else:
             self.max_trials = 15
+
+        #El número de max_trials para buscar función de activación será igual a la longitud de la lista de funciones de activación
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
+
+        ##El número mínimo de max_trials para buscar el optimizador debe ser la longitud de la lista de optimizadores. Pero el máximo podrá ser cualquiera
+        if (user_max_trials is not None) and (user_max_trials >= len(self.optimizers_list)):
+            self.max_trials_optimizer_tuner = user_max_trials
+        else:
+            self.max_trials_optimizer_tuner = len(self.optimizers_list)
+
         self.objective = "val_accuracy"
         self.overwrite = True
         self.directory = "autotune"
@@ -240,6 +249,8 @@ class  Model():
         self.assign_num_hidden_layers_to_model()
         self.assign_lr_to_model()
 
+        self.debugHyperparams()
+
         ####SEGUNDA VUELTA###
         #Se deciden numero de neuronas por capa y nueva aprox de lr
 
@@ -259,6 +270,8 @@ class  Model():
             self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
 
 
+        self.debugHyperparams()
+
         ####TERCERA VUELTA
         # Se decide funcion de activacion de las capas ocultas
 
@@ -273,10 +286,11 @@ class  Model():
         # asignamos resultados de la tercera vuelta:
         self.assign_hidden_activation_function_to_model()
 
+        self.debugHyperparams()
 
         ####Cuarta VUELTA####
         self.bayesian_opt_tuner = kt.BayesianOptimization(
-            self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
+            self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials_optimizer_tuner, overwrite=self.overwrite,
             directory=self.directory, project_name='optimizer_and_lr'
         )
 
@@ -287,7 +301,24 @@ class  Model():
         self.assign_lr_to_model()
         self.assign_optimizer_to_model()
 
-    #####Quinta VUELTA####
+        self.debugHyperparams()
+
+        #####Quinta VUELTA####
+        #Hacer vuelta extra de elección de lr más en detalle con el optimizador correcto
+        self.bayesian_opt_tuner = kt.BayesianOptimization(
+            self.select_lr, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
+            directory=self.directory, project_name='lr'
+        )
+
+        # deja en los atributos de la clase los resultados del fine tuning
+        self.search()
+
+        # asignamos resultados:
+        self.assign_lr_to_model()
+
+        self.debugHyperparams()
+
+        #####SEXTA VUELTA ####
         self.bayesian_opt_tuner = kt.BayesianOptimization(
             self.select_optimizer_params, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
             directory=self.directory, project_name='optimizer_params'
@@ -299,8 +330,11 @@ class  Model():
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
 
+        self.debugHyperparams()
+
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_model()
+        self.debugHyperparams()
 
     def search(self):
         #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
@@ -450,6 +484,7 @@ class  Model():
 
         #Se traduce la funcion de activacion de string -> funcion de tf.keras
         self.hidden_activation_function = self.available_hidden_activation_functions[hidden_activation_function_choice]
+
         model = self.create_and_compile_model()
         return model
 
@@ -458,10 +493,49 @@ class  Model():
 
         optimizer_choice = hp.Choice("optimizer",self.optimizers_list)
         #también se reentrena lr, ya que salia aviso de que si se exploraban mas valores (menores de 1e-5) podia ir mejor
-        lr = hp.Float("lr",min_value= (self.lr / 100), max_value= self.lr*100, sampling='log')
+        lr = hp.Float("lr",min_value= (self.lr / 10), max_value= self.lr*10, sampling='log')
 
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[optimizer_choice](learning_rate= lr)
+
+        model = self.create_and_compile_model()
+        return model
+
+    def select_lr(self,hp):
+        lr = hp.Float("lr", min_value=(self.lr / 100), max_value=self.lr * 100, sampling='log')
+
+        if self.optimizer_name == 'adamw':
+            self.optimizer = tf.keras.optimizers.AdamW(learning_rate=lr)
+
+        if self.optimizer_name == 'adamax':
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate=lr)
+    
+        if self.optimizer_name == 'adafactor':
+            self.optimizer = tf.keras.optimizers.Adafactor(learning_rate=lr)
+    
+        if self.optimizer_name == 'adadelta':
+            self.optimizer = tf.keras.optimizers.Adadelta(learning_rate=lr)
+    
+        if self.optimizer_name == 'adagrad':
+            self.optimizer = tf.keras.optimizers.Adagrad(learning_rate=lr)
+    
+        if self.optimizer_name == 'ftrl':
+            self.optimizer = tf.keras.optimizers.Ftrl(learning_rate=lr)
+    
+        if self.optimizer_name == 'lion':
+            self.optimizer = tf.keras.optimizers.Lion(learning_rate=lr)
+    
+        if self.optimizer_name == 'adam':
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+    
+        if self.optimizer_name == 'rmsprop':
+            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=lr)
+    
+        if self.optimizer_name == 'nadam':
+            self.optimizer = tf.keras.optimizers.Nadam(learning_rate=lr)
+    
+        if self.optimizer_name == 'sgd':
+            self.optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
 
         model = self.create_and_compile_model()
         return model
@@ -542,9 +616,6 @@ class  Model():
         if self.optimizer_name == 'lion':
             self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
-        if self.optimizer_name == 'lamb':
-            self.optimizer = tf.keras.optimizers.Lamb(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
-
         if self.optimizer_name == 'adam':
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
@@ -610,3 +681,11 @@ class  Model():
 
     def get_final_hyperparams_and_params(self):
         return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs,self.max_trials]
+
+    def debugHyperparams(self):
+        print(f"#########DEBUG##########")
+        print(f"Número de neuronas por capa: {self.num_hidden_layers}")
+        print(f"Learning Rate: {self.lr}")
+        print(f"Número de neuronas por capa: {self.num_neurons_per_hidden}")
+        print(f"Función de activación: {self.hidden_activation_function.__name__}")
+        print(f"Optimizador: {self.optimizer_name}")

@@ -1,0 +1,110 @@
+nombre_dataset = iris
+loss = 0.13478271663188934
+precision = 0.9333333373069763
+lr = 0.04339578200206991
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.13959097862243652
+precision = 0.8999999761581421
+lr = 0.020460343532790318
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.07738509029150009
+precision = 0.9333333373069763
+lr = 0.0065186113904152024
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.2361445128917694
+precision = 0.8999999761581421
+lr = 0.1270222344652461
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.5004463195800781
+precision = 0.6666666865348816
+lr = 0.3533111704667244
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.22961623966693878
+precision = 0.9666666388511658
+lr = 0.06221631020758861
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.15832044184207916
+precision = 0.9333333373069763
+lr = 0.14039381542159948
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 2
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.6968259215354919
+precision = 0.7666666507720947
+lr = 0.041382051222480475
+optimizador = rmsprop
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 2
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 1.1576521396636963
+precision = 0.800000011920929
+lr = 1.2357378717722682
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 2
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = iris
+loss = 0.34838977456092834
+precision = 0.8666666746139526
+lr = 0.02696962129748601
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 10
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################
