@@ -9,13 +9,20 @@ def ejecutar_prueba_interna(data,nombre_fichero_dataset,user_num_epochs,user_max
     pintar_resultado_en_fichero(datos_entrenamiento)
 
 
-nombre_fichero_dataset = "iris"
-data_iris = fetch_ucirepo(id=53).data  # clasificacion
+# nombre_fichero_dataset = "iris"
+# data =fetch_ucirepo(id=53).data  # clasificacion
+# nombre_fichero_dataset = "heart_disease"
+# data = fetch_ucirepo(id=45).data #clasificacion
+data = fetch_ucirepo(id=73).data #clasificacion
+nombre_fichero_dataset = "mushroom"
 
-for i in range(10):
-    ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 10, 10)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 70)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 60)
-# ejecutar_prueba_interna(data_iris, nombre_fichero_dataset, 100, 60)
+
+for i in range(2):
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 10, 20)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 2, 10)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 7, 10)
+
+
 
 

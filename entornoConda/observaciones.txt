@@ -10,3 +10,8 @@ Fallo-> El numero de trials del optimizador debería ser como mínimo igual que 
 Posible fallo -> Mejor probar optimizador con learning rate combinado y luego una eleccion por separado de lr
 He modificado la heurística de búsqueda de select_optimizer_and_lr con la lr siendo self.lr/10 y self.lr*10, en vez de 100
 En la nueva busqueda de lr (select_lr) si se busca entre +- 100
+
+Cuando se entrena epoca a epoca en el search, está cogiendo la mejor val_accuracy que ve por cada epoca. ¿No sería más correcto coger la val_accuracy final solamente? Ya que es la val_accuracy más entrenada, si hay un valor anterior más alto puede ser casualidad por los datos
+Cambio de heurística: Learning Rate en su búsqueda se va desde el propio valor hasta valor/100. El objetivo del tuner ahora es val_loss
+Cuando se entrena el modelo final, parece que se hace overfitting, por lo que da un valor de loss bastante grande. ¿Early stopping?
+Con mushroom mucho mejores valores

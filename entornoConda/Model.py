@@ -26,7 +26,7 @@ class  Model():
         tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
 
         # atributos de parametros pasados al fit method de funcion train
-        self.validation_split = 0.2  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
+        self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
         self.shuffle = True  # Para que baraje los datos antes de la división del val set
         self.batch_size = batch_size
         self.verbose = 1
@@ -202,7 +202,7 @@ class  Model():
         else:
             self.max_trials_optimizer_tuner = len(self.optimizers_list)
 
-        self.objective = "val_accuracy"
+        self.objective = "val_loss"
         self.overwrite = True
         self.directory = "autotune"
 
@@ -493,7 +493,7 @@ class  Model():
 
         optimizer_choice = hp.Choice("optimizer",self.optimizers_list)
         #también se reentrena lr, ya que salia aviso de que si se exploraban mas valores (menores de 1e-5) podia ir mejor
-        lr = hp.Float("lr",min_value= (self.lr / 10), max_value= self.lr*10, sampling='log')
+        lr = hp.Float("lr",min_value= (self.lr / 10), max_value= self.max_lr, sampling='log')
 
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[optimizer_choice](learning_rate= lr)
@@ -502,7 +502,7 @@ class  Model():
         return model
 
     def select_lr(self,hp):
-        lr = hp.Float("lr", min_value=(self.lr / 100), max_value=self.lr * 100, sampling='log')
+        lr = hp.Float("lr", min_value=(self.lr / 100), max_value=self.lr, sampling='log')
 
         if self.optimizer_name == 'adamw':
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate=lr)
@@ -684,7 +684,7 @@ class  Model():
 
     def debugHyperparams(self):
         print(f"#########DEBUG##########")
-        print(f"Número de neuronas por capa: {self.num_hidden_layers}")
+        print(f"Número de capas: {self.num_hidden_layers}")
         print(f"Learning Rate: {self.lr}")
         print(f"Número de neuronas por capa: {self.num_neurons_per_hidden}")
         print(f"Función de activación: {self.hidden_activation_function.__name__}")
