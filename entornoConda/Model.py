@@ -60,7 +60,7 @@ class  Model():
         self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_hidden_layers = None
         self.lr = None
-        self.num_neurons_per_hidden = 10
+        self.num_neurons_per_hidden = 5
 
         self.initialize_optimizer_variables(user_optimizers_list)
 
@@ -90,34 +90,37 @@ class  Model():
             self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
     def initialize_num_neurons_per_hidden_variables(self,user_min_num_neurons_per_hidden=None,user_max_num_neurons_per_hidden=None):
-        self.min_num_neurons_per_hidden = 30
+        self.min_num_neurons_per_hidden = 5
         self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
         self.use_user_param_values = False
-        self.max_num_neurons_per_hidden = None
+        self.max_num_neurons_per_hidden = math.ceil(math.sqrt(self.X_train.shape[1]))
 
-        if user_min_num_neurons_per_hidden is not None:
-            if user_max_num_neurons_per_hidden is not None:
-                #Se ha recibido min y max neurons per hidden layers por parametro
-                #Se comprueba que el mínimo no es mayor que el máximo
-                if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
-                    self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-                    self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-                    self.use_user_param_values = True
-                else:
-                    print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
-
-            else:
-                #solo se ha recibido min neurons per hidden layers por parametro
-                self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-
-        else:
-            if user_max_num_neurons_per_hidden is not None:
-                #Solo se ha recibido max neurons per hidden layers por parametro
-                if self.min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
-                    self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-
-                else:
-                    print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
+        # if user_min_num_neurons_per_hidden is not None:
+        #     if user_max_num_neurons_per_hidden is not None:
+        #         #Se ha recibido min y max neurons per hidden layers por parametro
+        #         #Se comprueba que el mínimo no es mayor que el máximo
+        #         if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+        #             self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+        #             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+        #             self.use_user_param_values = True
+        #         else:
+        #             print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
+        #
+        #     else:
+        #         #solo se ha recibido min neurons per hidden layers por parametro
+        #         self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+        #         self.use_user_param_values= True
+        #
+        # else:
+        #     if user_max_num_neurons_per_hidden is not None:
+        #         #Solo se ha recibido max neurons per hidden layers por parametro
+        #         if self.min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+        #             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+        #             self.use_user_param_values=True
+        #
+        #         else:
+        #             print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
+        #     print(f"Valor de max_num_neurons: {self.max_num_neurons_per_hidden}. Debe devolver none")
 
     def initialize_optimizer_variables(self,user_optimizers_list = None):
 
@@ -551,30 +554,34 @@ class  Model():
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[self.optimizers_list[0]](learning_rate=self.lr)
 
-        if self.use_user_param_values:
-            # Si hay muchas features o se van a poner muchas neuronas, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
-            if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
-                                                     min_value=self.min_num_neurons_per_hidden,
-                                                     max_value=self.max_num_neurons_per_hidden,
-                                                     sampling='log')
-            else:
-                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
-                                                     min_value=self.min_num_neurons_per_hidden,
-                                                     max_value=self.max_num_neurons_per_hidden)
-        else:
-            #Se comprueba si el máximo tiene un valor o se dejó a None al inicializar variables de num_neurons_per_hidden
-            if self.max_num_neurons_per_hidden is None:
-                #Se traduce a que el max es X_train.shape[1]
-                self.max_num_neurons_per_hidden = self.X_train.shape[1]
+        # if self.use_user_param_values:
+        #     # Si hay muchas features o se van a poner muchas neuronas, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+        #     if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
+        #         self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
+        #                                              min_value=self.min_num_neurons_per_hidden,
+        #                                              max_value=self.max_num_neurons_per_hidden,
+        #                                              sampling='log')
+        #     else:
+        #         self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
+        #                                              min_value=self.min_num_neurons_per_hidden,
+        #                                              max_value=self.max_num_neurons_per_hidden)
+        # else:
+        #     #Se comprueba si el máximo tiene un valor o se dejó a None al inicializar variables de num_neurons_per_hidden
+        #     if self.max_num_neurons_per_hidden is None:
+        #         #Se traduce a que el max es X_train.shape[1]
+        #         self.max_num_neurons_per_hidden = self.X_train.shape[1]
+        print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}")
 
-            if self.max_num_neurons_per_hidden <= self.min_num_neurons_per_hidden:
-                self.num_neurons_per_hidden = self.min_num_neurons_per_hidden  # SI EL NUMERO DE FEATURES ES INFERIOR A 30, COGER 30 NEURONAS POR CAPA.
+        if self.max_num_neurons_per_hidden <= self.min_num_neurons_per_hidden:
+            self.num_neurons_per_hidden = self.min_num_neurons_per_hidden
+        else:
+            if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden,sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
+                print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}. Si hay sampling=log")
+
             else:
-                if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
-                    self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden,sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
-                else:
-                    self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden)
+                self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden)
+                print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}. NO hay sampling=log")
 
         model = self.create_and_compile_model()
         return model
