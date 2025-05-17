@@ -2,19 +2,7 @@
 -Para automatizar proceso. ¿Dejar información en un fichero que resuma precisión y loss para cada conjunto final de datos, es decir, para 100 epocas -> ver como son los resultados. Luego para 1000 y luego para 10000?
 -AL llamar a Model ¿Pedir numero de batches obligatorio o numero de epocas o ninguno de ellos y fijar valor default?
 
-poner bien la lr al cambiar de optimizador - Esta bien
-Revisar que cada iteracion de hiperparametros guarde bien el valor -> Bien
-Validation accuracy deberia ser menos que la accuracy de entrenamiento por lo general -> Problema ¿Aumentar porcentaje de validacion?
-
-Fallo-> El numero de trials del optimizador debería ser como mínimo igual que la longitud de la lista que se le pasa (estaba puesto al numero de trials en general que habia). Es decir, hacerlo como la funcion de activacion. Ya hecho
-Posible fallo -> Mejor probar optimizador con learning rate combinado y luego una eleccion por separado de lr
-He modificado la heurística de búsqueda de select_optimizer_and_lr con la lr siendo self.lr/10 y self.lr*10, en vez de 100
-En la nueva busqueda de lr (select_lr) si se busca entre +- 100
-
-Cuando se entrena epoca a epoca en el search, está cogiendo la mejor val_accuracy que ve por cada epoca. ¿No sería más correcto coger la val_accuracy final solamente? Ya que es la val_accuracy más entrenada, si hay un valor anterior más alto puede ser casualidad por los datos
-Cambio de heurística: Learning Rate en su búsqueda se va desde el propio valor hasta valor/100. El objetivo del tuner ahora es val_loss
 Cuando se entrena el modelo final, parece que se hace overfitting, por lo que da un valor de loss bastante grande. ¿Early stopping?
-Con mushroom mucho mejores valores
 
 #Preguntar si es correcto hacer la division de datos de validacion despues de haber codificado las clases y las cosas en funcion Model en el constructor
-No habia puesto binary_crossentropy en caso de tener solamente dos clases como target
+Sigue ocurriendo el Nan -> Loss demasiado alta
