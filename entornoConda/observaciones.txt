@@ -15,3 +15,6 @@ Cuando se entrena epoca a epoca en el search, está cogiendo la mejor val_accura
 Cambio de heurística: Learning Rate en su búsqueda se va desde el propio valor hasta valor/100. El objetivo del tuner ahora es val_loss
 Cuando se entrena el modelo final, parece que se hace overfitting, por lo que da un valor de loss bastante grande. ¿Early stopping?
 Con mushroom mucho mejores valores
+
+#Preguntar si es correcto hacer la division de datos de validacion despues de haber codificado las clases y las cosas en funcion Model en el constructor
+No habia puesto binary_crossentropy en caso de tener solamente dos clases como target

@@ -17,11 +17,11 @@ data = fetch_ucirepo(id=73).data #clasificacion
 nombre_fichero_dataset = "mushroom"
 
 
-for i in range(2):
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 10, 20)
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 2, 10)
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 7, 10)
+for i in range(4):
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 10, 10)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 15, 10)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 20, 10)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 25, 10)
 
 
 

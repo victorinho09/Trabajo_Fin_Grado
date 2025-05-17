@@ -20,3 +20,25 @@ numero_capas_ocultas = 7
 numero_epocas = 10
 max_trials = 20
 ####################################
+nombre_dataset = mushroom
+loss = 0.0
+precision = 1.0
+lr = 0.008129572361687177
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 66
+numero_capas_ocultas = 11
+numero_epocas = 10
+max_trials = 20
+####################################
+nombre_dataset = mushroom
+loss = 0.0
+precision = 1.0
+lr = 0.00791019335687774
+optimizador = adam
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 39
+numero_capas_ocultas = 11
+numero_epocas = 10
+max_trials = 20
+####################################

@@ -1,0 +1,22 @@
+nombre_dataset = mushroom
+loss = 7.577781957479601e-07
+precision = 1.0
+lr = 0.004066073698747469
+optimizador = nadam
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 94
+numero_capas_ocultas = 8
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = mushroom
+loss = 0.0
+precision = 1.0
+lr = 0.00551148498170849
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 43
+numero_capas_ocultas = 8
+numero_epocas = 10
+max_trials = 10
+####################################

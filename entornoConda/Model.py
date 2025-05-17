@@ -12,7 +12,9 @@ from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,user_num_epochs=None,user_max_trials= None,
+    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,
+                 user_num_epochs=None,
+                 user_max_trials= None,
                  user_min_num_hidden_layers: int = None,
                  user_max_num_hidden_layers: int = None,
                  user_min_num_neurons_per_hidden: int = None,
@@ -44,7 +46,7 @@ class  Model():
             self.y_train = y_train
         self.validation_data = (self.X_val,self.y_val)
 
-
+        self.num_clases_target = self.y_train.shape[1]
 
         self.num_batches = num_batches
         if user_num_epochs is not None:
@@ -81,7 +83,11 @@ class  Model():
         self.best_hyperparameters = None
         self.metrics = []
         self.model = None
-        self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
+
+        if self.num_clases_target == 2:
+            self.loss = "binary_crossentropy"
+        else:
+            self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
     def initialize_num_neurons_per_hidden_variables(self,user_min_num_neurons_per_hidden=None,user_max_num_neurons_per_hidden=None):
         self.min_num_neurons_per_hidden = 30
