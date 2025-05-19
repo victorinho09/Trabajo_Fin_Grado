@@ -1,0 +1,11 @@
+nombre_dataset = bank_marketing
+loss = 0.2219095379114151
+precision = 0.902687132358551
+lr = 0.003943479983330346
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 7
+numero_capas_ocultas = 2
+numero_epocas = 15
+max_trials = 30
+####################################

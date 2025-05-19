@@ -13,18 +13,21 @@ def ejecutar_prueba_interna(data,nombre_fichero_dataset,user_num_epochs,user_max
 # data =fetch_ucirepo(id=53).data  # clasificacion
 # nombre_fichero_dataset = "heart_disease"
 # data = fetch_ucirepo(id=45).data #clasificacion
-data = fetch_ucirepo(id=73).data #clasificacion
-nombre_fichero_dataset = "mushroom"
-data = fetch_ucirepo(id=17).data #clasificacion
-nombre_fichero_dataset = "breast_cancer_wisconsin_diagnostic"
-#print("Breast_cancer dataset cargado")
+# data = fetch_ucirepo(id=73).data #clasificacion
+# nombre_fichero_dataset = "mushroom"
+# data = fetch_ucirepo(id=17).data #clasificacion
+# nombre_fichero_dataset = "breast_cancer_wisconsin_diagnostic"
+data = fetch_ucirepo(id=222).data #clasificacion
+nombre_fichero_dataset = "bank_marketing"
+
 
 
 for i in range(6):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 1, 2)
-    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 1, 3)
-    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 1, 4)
-    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 25, 10)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 1, 3)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 1, 1)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 40, 10)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 40, 30)
 
 
 

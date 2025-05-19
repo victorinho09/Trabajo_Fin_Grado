@@ -1,0 +1,22 @@
+nombre_dataset = bank_marketing
+loss = 0.22075268626213074
+precision = 0.9035718441009521
+lr = 0.0038493492848223993
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 7
+numero_capas_ocultas = 6
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = bank_marketing
+loss = 0.22622261941432953
+precision = 0.9025765657424927
+lr = 0.0034309500875071785
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 5
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################

@@ -1,0 +1,66 @@
+nombre_dataset = bank_marketing
+loss = 0.6577629446983337
+precision = 0.8830034136772156
+lr = 2.608671942353474e-05
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 7
+numero_capas_ocultas = 7
+numero_epocas = 1
+max_trials = 1
+####################################
+nombre_dataset = bank_marketing
+loss = 0.7204397320747375
+precision = 0.2449408322572708
+lr = 2.143995220139164e-05
+optimizador = sgd
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 7
+numero_capas_ocultas = 5
+numero_epocas = 1
+max_trials = 1
+####################################
+nombre_dataset = bank_marketing
+loss = 0.23626969754695892
+precision = 0.8967157006263733
+lr = 0.0025221149262246926
+optimizador = nadam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 5
+numero_capas_ocultas = 5
+numero_epocas = 1
+max_trials = 1
+####################################
+nombre_dataset = bank_marketing
+loss = 0.6353045701980591
+precision = 0.8702864050865173
+lr = 9.381117065868076e-06
+optimizador = nadam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 6
+numero_capas_ocultas = 2
+numero_epocas = 1
+max_trials = 1
+####################################
+nombre_dataset = bank_marketing
+loss = 0.6610298752784729
+precision = 0.8830034136772156
+lr = 3.406384910831704e-05
+optimizador = nadam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 5
+numero_capas_ocultas = 6
+numero_epocas = 1
+max_trials = 1
+####################################
+nombre_dataset = bank_marketing
+loss = 0.31258100271224976
+precision = 0.8792436122894287
+lr = 0.00012907197690137552
+optimizador = nadam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 7
+numero_capas_ocultas = 5
+numero_epocas = 1
+max_trials = 1
+####################################
