@@ -7,5 +7,5 @@ Cuando se entrena el modelo final, parece que se hace overfitting, por lo que da
 Sigue ocurriendo el Nan -> Loss demasiado alta
 
 mirar numero de neuronas
-Maximo de neuronas por capa oculta ahora es por default la raiz del numero de features de entrada
+Maximo de neuronas por capa oculta ahora es por default la raiz del numero de features de entrada (se ha cambiado al numero de features. Problema -> No converge, demasiadas neuronas y poco entrenamiento)
 Mínimo de neuronas por capa oculta ahora es 5 (pq las pruebas son con datasets pequeños en numero de features, pero que al codificarse aumenta el numero de features)
