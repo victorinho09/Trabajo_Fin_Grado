@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
+from tensorflow.keras.callbacks import EarlyStopping
 
 class  Model():
     def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,
@@ -33,7 +34,17 @@ class  Model():
         self.batch_size = batch_size
         self.verbose = 1
         self.log_dir = log_dir
-        self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger]
+
+        #Se hace solo para el entrenamiento final del modelo
+        early_stop = EarlyStopping(
+            monitor='val_loss',
+            patience=10,
+            verbose=1,
+            mode=min,
+            restore_best_weights=True
+        )
+
+        self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger,early_stop]
 
         #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
         if  (X_val is None) or (y_val is None) :
@@ -217,7 +228,7 @@ class  Model():
 
     def initialize_num_hidden_layers_variables(self,user_min_num_hidden_layers=None,user_max_num_hidden_layers=None):
         self.min_num_hidden_layers = 2
-        self.max_num_hidden_layers = max(4, math.ceil(math.sqrt(self.X_train.shape[1])))  # sqroot(nº features)
+        self.max_num_hidden_layers = 6  #Habia demasiadas capas si se ponia la raiz del numero de features
 
         if user_min_num_hidden_layers is not None:
             if user_max_num_hidden_layers is not None:
@@ -654,7 +665,7 @@ class  Model():
             validation_split=self.validation_split,
             # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
             shuffle=self.shuffle,
-            epochs= self.num_epochs,
+            epochs= 1000, #Se ponen muchas épocas, ya que se quiere que el modelo se entrene bien, independientemente del resto de tiempo de búsquedda de hiperparámetros. Con el early stopping para de entrenar
             batch_size=self.batch_size,
             verbose=self.verbose,
             callbacks=self.callbacks
