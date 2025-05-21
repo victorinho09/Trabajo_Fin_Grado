@@ -40,7 +40,8 @@ class  Model():
             patience=10,
             verbose=1,
             mode="min",
-            restore_best_weights=True
+            restore_best_weights=True,
+            min_delta=1e-4
         )
 
         self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger,early_stop]
@@ -580,18 +581,15 @@ class  Model():
         #     if self.max_num_neurons_per_hidden is None:
         #         #Se traduce a que el max es X_train.shape[1]
         #         self.max_num_neurons_per_hidden = self.X_train.shape[1]
-        print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}")
 
         if self.max_num_neurons_per_hidden <= self.min_num_neurons_per_hidden:
             self.num_neurons_per_hidden = self.min_num_neurons_per_hidden
         else:
             if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden,sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
-                print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}. Si hay sampling=log")
 
             else:
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden)
-                print(f"Número de features de X_train: {self.X_train.shape[1]}, cuya raíz cuadrada es {math.ceil(math.sqrt(self.X_train.shape[1]))}. NO hay sampling=log")
 
         model = self.create_and_compile_model()
         return model

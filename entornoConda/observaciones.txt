@@ -10,7 +10,7 @@ Sigue ocurriendo el Nan -> Loss demasiado alta
 limitar a 6 capas ocultas - OK
 meter early stopping con paciencia elevada (10) y restaurando pesos de la mejor epoca Restore_best_weights. val_loss. NO poner num_neuronas igual que busqueda -OK
 
-Mirar posible error al calcular loss al final del entrenamiento correcto
+Mirar posible error al calcular loss al final del entrenamiento correcto - OJO
 aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales.
 Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta.
 Meter en fichero de info el balanceo de instancias de clases target. 50/50
