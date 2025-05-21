@@ -28,8 +28,8 @@ nombre_fichero_dataset = "mushroom"
 
 for i in range(6):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 5)
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 20)
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 20)
+    # ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
     # ejecutar_prueba_interna(data, nombre_fichero_dataset, 40, 10)
     # ejecutar_prueba_interna(data, nombre_fichero_dataset, 40, 30)
 

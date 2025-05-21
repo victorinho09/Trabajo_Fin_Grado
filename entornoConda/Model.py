@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
 from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
-from tensorflow.keras.callbacks import EarlyStopping
 
 class  Model():
     def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,
@@ -36,7 +35,7 @@ class  Model():
         self.log_dir = log_dir
 
         #Se hace solo para el entrenamiento final del modelo
-        early_stop = EarlyStopping(
+        early_stop = tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
             patience=10,
             verbose=1,
