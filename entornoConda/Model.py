@@ -39,7 +39,7 @@ class  Model():
             monitor='val_loss',
             patience=10,
             verbose=1,
-            mode=min,
+            mode="min",
             restore_best_weights=True
         )
 
