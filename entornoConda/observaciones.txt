@@ -9,3 +9,11 @@ Sigue ocurriendo el Nan -> Loss demasiado alta
 mirar numero de neuronas
 Maximo de neuronas por capa oculta ahora es por default la raiz del numero de features de entrada (se ha cambiado al numero de features. Problema -> No converge, demasiadas neuronas y poco entrenamiento)
 Mínimo de neuronas por capa oculta ahora es 5 (pq las pruebas son con datasets pequeños en numero de features, pero que al codificarse aumenta el numero de features)
+
+Mirar posible error al calcular loss al final del entrenamiento correcto
+limitar a 6 capas ocultas
+meter early stopping con paciencia elevada (10) y restaurando pesos de la mejor epoca Restore_best_weights. val_loss. NO poner num_neuronas igual que busqueda
+aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales.
+Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta.
+Meter en fichero de info el balanceo de instancias de clases target. 50/50
+¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?
