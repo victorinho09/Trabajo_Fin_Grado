@@ -2,18 +2,11 @@
 -AL llamar a Model ¿Pedir numero de batches obligatorio o numero de epocas o ninguno de ellos y fijar valor default? -No prioritario
 -He quitado la posibilidad de introducir numero de neuronas por capas oculta (comentado) -No prioritario
 
-Cuando se entrena el modelo final, parece que se hace overfitting, por lo que da un valor de loss bastante grande. ¿Early stopping?
-#Preguntar si es correcto hacer la division de datos de validacion despues de haber codificado las clases y las cosas en funcion Model en el constructor
-Sigue ocurriendo el Nan -> Loss demasiado alta
-
-
 limitar a 6 capas ocultas - OK
 meter early stopping con paciencia elevada (10) y restaurando pesos de la mejor epoca Restore_best_weights. val_loss. NO poner num_neuronas igual que busqueda -OK
 Meter en fichero de info el balanceo de instancias de clases target. 50/50 - OK
+aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales. - OK
+Mirar posible error al calcular loss al final del entrenamiento correcto - OK .SI devuelve bien la loss
 
-Mirar posible error al calcular loss al final del entrenamiento correcto - OJO
-aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales.
-Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta.
-
-
+Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta. - RARO ya que no solo depende de la lr ¿Como saber si es mejor o no?
 ¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?

@@ -1,7 +1,6 @@
 import time
 
 import keras_tuner as kt
-import math
 
 import numpy as np
 import tensorflow as tf
@@ -513,8 +512,10 @@ class  Model():
 
         optimizer_choice = hp.Choice("optimizer",self.optimizers_list)
         #también se reentrena lr, ya que salia aviso de que si se exploraban mas valores (menores de 1e-5) podia ir mejor
-        lr = hp.Float("lr",min_value= (self.lr / 10), max_value= self.max_lr, sampling='log')
-
+        lr = hp.Float("lr",min_value= (self.lr / 10), max_value= (self.lr *10), sampling='log')
+        if lr >= self.max_lr:
+            #Si se pasa del limite, regresar al valor anterior, que está acotado en los límites
+            lr = self.lr
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[optimizer_choice](learning_rate= lr)
 
@@ -698,7 +699,7 @@ class  Model():
 
     def evaluate(self,X_test_scaled, y_test_encoded):
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
-        return self.model.evaluate(X_test_scaled, y_test_encoded)
+        return self.model.evaluate(X_test_scaled, y_test_encoded,batch_size=self.batch_size)
 
     def get_final_hyperparams_and_params(self):
         return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs,self.max_trials]

@@ -42,3 +42,14 @@ numero_capas_ocultas = 2
 numero_epocas = 5
 max_trials = 10
 ####################################
+nombre_dataset = mushroom
+loss = 0.00758413365110755
+precision = 0.9981538653373718
+lr = 0.010771046673067757
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 117
+numero_capas_ocultas = 3
+numero_epocas = 5
+max_trials = 10
+####################################
