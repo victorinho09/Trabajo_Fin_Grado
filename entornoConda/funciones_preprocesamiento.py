@@ -33,6 +33,17 @@ def preprocess_data(data,nombre_fichero_info_dataset):
     X_not_nan = X[mask_not_nan].reset_index(drop=True)
     y_not_nan = y[mask_not_nan].reset_index(drop=True)
 
+    #Calcular el balanceo del dataset antes del split para ver sesgos posibles
+    # Con w, se sobreescribe el fichero entero
+    with open(ruta_fichero, "w") as f:
+        counts = y_not_nan['target'].value_counts()
+        total_filas = counts.sum()
+        porcentaje_instancias_de_cada_clase = (counts / total_filas * 100).round(2)
+
+        for clase,porcentaje in porcentaje_instancias_de_cada_clase.items():
+            f.write(f"Clase '{clase}' -> {porcentaje}% de instancias en dataset\n")
+
+
     #Train/Test split
     X_train, X_test, y_train, y_test = train_test_split(
         X_not_nan, y_not_nan, test_size=0.2, random_state=42, stratify=y #Hace falta stratify porque hay algún dataset (bike_sharing)
@@ -40,7 +51,7 @@ def preprocess_data(data,nombre_fichero_info_dataset):
     )
 
     #Con w, se sobreescribe el fichero entero
-    with open(ruta_fichero, "w") as f:
+    with open(ruta_fichero, "a") as f:
         f.write(f"y_train_count values: {y_train['target'].nunique()}\n")
 
     with open(ruta_fichero, "a") as f:
