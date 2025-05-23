@@ -108,3 +108,36 @@ numero_capas_ocultas = 4
 numero_epocas = 5
 max_trials = 20
 ####################################
+nombre_dataset = mushroom
+loss = 2.318186034244718e-06
+precision = 1.0
+lr = 0.003787138986128325
+optimizador = adam
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 73
+numero_capas_ocultas = 4
+numero_epocas = 5
+max_trials = 20
+####################################
+nombre_dataset = mushroom
+loss = 0.02307172305881977
+precision = 0.9963076710700989
+lr = 0.004414547242363001
+optimizador = nadam
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 71
+numero_capas_ocultas = 6
+numero_epocas = 5
+max_trials = 20
+####################################
+nombre_dataset = mushroom
+loss = 6.149170530989068e-06
+precision = 1.0
+lr = 0.0014532230545461907
+optimizador = rmsprop
+funcion_activacion = leaky_relu
+numero_neuronas_por_capa_oculta = 92
+numero_capas_ocultas = 5
+numero_epocas = 5
+max_trials = 20
+####################################

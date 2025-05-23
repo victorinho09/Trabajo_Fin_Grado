@@ -621,7 +621,6 @@ class  Model():
             self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'adafactor':
-            #Solo tiene epsilons, no merece pena?
             self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr)
 
         if self.optimizer_name == 'adadelta':
@@ -660,15 +659,13 @@ class  Model():
         self.history = self.model.fit(
             self.X_train,
             self.y_train,
-            validation_split=self.validation_split,
-            # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
+            validation_data=self.validation_data,
             shuffle=self.shuffle,
             epochs= 1000, #Se ponen muchas épocas, ya que se quiere que el modelo se entrene bien, independientemente del resto de tiempo de búsquedda de hiperparámetros. Con el early stopping para de entrenar
             batch_size=self.batch_size,
             verbose=self.verbose,
             callbacks=self.callbacks
         )
-        print("Numero de epocas patra el entrenamiento final:", self.num_epochs)
         #Obtenemos las metricas
         self.set_metrics(self.callbacks[2])
 
@@ -697,9 +694,10 @@ class  Model():
             # print(epoch)
 
 
-    def evaluate(self,X_test_scaled, y_test_encoded):
+    def evaluate(self,X_test, y_test):
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
-        return self.model.evaluate(X_test_scaled, y_test_encoded,batch_size=self.batch_size)
+        print("Se hace la evaluacion:")
+        return self.model.evaluate(X_test, y_test,batch_size=self.batch_size)
 
     def get_final_hyperparams_and_params(self):
         return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs,self.max_trials]
