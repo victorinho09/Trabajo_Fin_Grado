@@ -1,0 +1,99 @@
+nombre_dataset = mushroom
+loss = 0.00018610245024319738
+precision = 1.0
+lr = 0.0005583401493713194
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 49
+numero_capas_ocultas = 3
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 6.841943104518577e-05
+precision = 1.0
+lr = 0.0014124370569479035
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 49
+numero_capas_ocultas = 2
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 0.000692225294187665
+precision = 0.9993846416473389
+lr = 0.00031750248463269953
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 71
+numero_capas_ocultas = 2
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 1.435389549442334e-06
+precision = 1.0
+lr = 0.003692594689223196
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 67
+numero_capas_ocultas = 3
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 0.30426928400993347
+precision = 0.9169231057167053
+lr = 7.399794724948346e-08
+optimizador = nadam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 109
+numero_capas_ocultas = 2
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 4.4940631482859317e-07
+precision = 1.0
+lr = 0.0003246202390388227
+optimizador = nadam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 95
+numero_capas_ocultas = 6
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 0.004353716969490051
+precision = 0.9993846416473389
+lr = 0.006702872264449096
+optimizador = nadam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 76
+numero_capas_ocultas = 5
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 0.0038527040742337704
+precision = 0.9981538653373718
+lr = 5.906438257127371e-06
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 12
+numero_capas_ocultas = 6
+numero_epocas = 5
+max_trials = 3
+####################################
+nombre_dataset = mushroom
+loss = 0.00016104574024211615
+precision = 1.0
+lr = 0.0005787337959644152
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 52
+numero_capas_ocultas = 5
+numero_epocas = 5
+max_trials = 3
+####################################

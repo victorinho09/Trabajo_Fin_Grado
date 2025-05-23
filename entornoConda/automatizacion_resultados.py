@@ -24,16 +24,16 @@ nombre_fichero_dataset = "mushroom"
 # data = fetch_ucirepo(id=222).data #clasificacion
 # nombre_fichero_dataset = "bank_marketing"
 
-for i in range(6):
+for i in range(5):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 3)
 
-for i in range(6):
+for i in range(5):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
 
-for i in range(6):
+for i in range(5):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 20)
 
-for i in range(6):
+for i in range(5):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 10, 10)
 
 
