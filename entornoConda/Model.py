@@ -697,6 +697,7 @@ class  Model():
     def evaluate(self,X_test, y_test):
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
         print("Se hace la evaluacion:")
+        #Por pantalla se imprime la loss del ultimo batch ejecutado por evaluate. Pero la funcion devuelve la perdida media de todos los batches
         return self.model.evaluate(X_test, y_test,batch_size=self.batch_size)
 
     def get_final_hyperparams_and_params(self):
