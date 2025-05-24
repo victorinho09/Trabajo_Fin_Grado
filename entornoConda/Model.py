@@ -370,7 +370,7 @@ class  Model():
         print(f"Función de activación óptima: {self.best_hyperparameters['hidden_activation_function']}")
 
     def assign_lr_to_model(self):
-        self.lr = self.best_hyperparameters['lr']
+        self.lr = float(self.best_hyperparameters['lr'])
         print(f"Tasa de aprendizaje óptima: {self.best_hyperparameters['lr']}")
 
     def assign_optimizer_to_model(self):
@@ -610,9 +610,9 @@ class  Model():
 
     def select_optimizer_params(self,hp):
         nesterov_choice = hp.Boolean("nesterov", default=True)
-        beta1_choice = np.float32(hp.Float("beta1",min_value=0.85, max_value=0.99))
-        beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
-        rho_choice = np.float32(hp.Float("rho", min_value=0.8, max_value=0.95))
+        beta1_choice = float(hp.Float("beta1",min_value=0.85, max_value=0.99))
+        beta2_choice = float(hp.Float("beta2",min_value=0.85, max_value=0.9999))
+        rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
 
         if self.optimizer_name == 'adamw':
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)

@@ -14,7 +14,8 @@ Todas las iteraciones que dan loss alta tiene en comun:
 -Numero de neuronas cercano al limite superior ~117
 -rmsprop con leaky relu
 
-He probado a quitar leaky_relu
+He probado a quitar leaky_relu -> Ya no me han salido iteraciones con loss disparada
+assign_lr_to_model he probado a poner np.float32 pq a veces salen errores de tipos entre 32 y 64 float
 
 Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta. - RARO ya que no solo depende de la lr ¿Como saber si es mejor o no?
 ¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?
