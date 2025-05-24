@@ -201,7 +201,7 @@ class  Model():
             hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
             self.hidden_activation_function_list = hidden_activation_function_list_lowercase
         else:
-            self.hidden_activation_function_list = ['relu', 'leaky_relu', 'elu', 'silu']
+            self.hidden_activation_function_list = ['relu','elu', 'silu']
         self.hidden_activation_function = self.available_hidden_activation_functions[
             self.hidden_activation_function_list[0]]
 
