@@ -9,6 +9,7 @@ aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no
 Mirar posible error al calcular loss al final del entrenamiento correcto - OK .SI devuelve bien la loss
 
 En metodo train, he cambiado validation split por validation data
+Momentum 0.7-0.9 para probar
 
 Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta. - RARO ya que no solo depende de la lr ¿Como saber si es mejor o no?
 ¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?

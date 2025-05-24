@@ -641,7 +641,7 @@ class  Model():
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'rmsprop':
-            momentum_choice= float(hp.Float("momentum",min_value=0.0,max_value=0.9))
+            momentum_choice= float(hp.Float("momentum",min_value=0.7,max_value=0.9))
             self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice)
 
         if self.optimizer_name == 'nadam':
