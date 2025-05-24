@@ -610,9 +610,9 @@ class  Model():
 
     def select_optimizer_params(self,hp):
         nesterov_choice = hp.Boolean("nesterov", default=True)
-        beta1_choice = np.float32(hp.Float("beta1",min_value=0.7, max_value=0.99))
+        beta1_choice = np.float32(hp.Float("beta1",min_value=0.85, max_value=0.99))
         beta2_choice = np.float32(hp.Float("beta2",min_value=0.85, max_value=0.9999))
-        rho_choice = np.float32(hp.Float("rho", min_value=0.7, max_value=0.95))
+        rho_choice = np.float32(hp.Float("rho", min_value=0.8, max_value=0.95))
 
         if self.optimizer_name == 'adamw':
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
