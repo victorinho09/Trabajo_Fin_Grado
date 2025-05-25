@@ -103,7 +103,8 @@ class  Model():
         self.min_num_neurons_per_hidden = 5
         self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
         self.use_user_param_values = False
-        self.max_num_neurons_per_hidden = self.X_train.shape[1]
+        self.max_num_neurons_per_hidden = (2/3) * self.X_train.shape[1] + self.y_train['target'].nunique()
+        print(f"Máximo número de neuronas por capa: {self.max_num_neurons_per_hidden}")
 
         # if user_min_num_neurons_per_hidden is not None:
         #     if user_max_num_neurons_per_hidden is not None:

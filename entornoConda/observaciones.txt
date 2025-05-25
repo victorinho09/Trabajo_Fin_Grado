@@ -14,8 +14,7 @@ Todas las iteraciones que dan loss alta tiene en comun:
 -Numero de neuronas cercano al limite superior ~117
 -rmsprop con leaky relu
 
-He probado a quitar leaky_relu -> Ya no me han salido iteraciones con loss disparada
-siguen dando malos valores cuando se usa un numero de neuronas por capa muy alto
+siguen dando malos valores cuando se usa un numero de neuronas por capa muy alto y numero de capas 5 o 6
 
 Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta. - RARO ya que no solo depende de la lr ¿Como saber si es mejor o no?
 ¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?
