@@ -8,13 +8,15 @@ Meter en fichero de info el balanceo de instancias de clases target. 50/50 - OK
 aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales. - OK
 Mirar posible error al calcular loss al final del entrenamiento correcto - OK .SI devuelve bien la loss
 
-En metodo train, he cambiado validation split por validation data
 Momentum 0.7-0.9 para probar
 Todas las iteraciones que dan loss alta tiene en comun:
 -Numero de neuronas cercano al limite superior ~117
 -rmsprop con leaky relu
 
 siguen dando malos valores cuando se usa un numero de neuronas por capa muy alto y numero de capas 5 o 6
+cambio de numero maximo de neuronas por capa
+He dejado solo relu/elu y adam/sgd
+
+cambio codigo select_optimizer_params -> En realidad no se cogian valores mal, pero si los printeaba por pantalla
 
 Mirar que no coja un valor del lr peor que uno ya elegido anteriormente en otra vuelta. - RARO ya que no solo depende de la lr ¿Como saber si es mejor o no?
-¿Fijar valores de hiperparametros mejora los resultados.Mas consistentes. Poner solo adam y relu por ej.?

@@ -1,3 +1,4 @@
+import math
 import time
 
 import keras_tuner as kt
@@ -103,7 +104,7 @@ class  Model():
         self.min_num_neurons_per_hidden = 5
         self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
         self.use_user_param_values = False
-        self.max_num_neurons_per_hidden = (2/3) * self.X_train.shape[1] + self.y_train['target'].nunique()
+        self.max_num_neurons_per_hidden = math.ceil((2/3) * self.X_train.shape[1] + self.y_train.shape[1])
         print(f"Máximo número de neuronas por capa: {self.max_num_neurons_per_hidden}")
 
         # if user_min_num_neurons_per_hidden is not None:
@@ -154,7 +155,7 @@ class  Model():
             optimizers_list_lowercase = [s.lower() for s in user_optimizers_list]
             self.optimizers_list =  optimizers_list_lowercase
         else:
-            self.optimizers_list = ['adam', 'nadam', 'rmsprop','sgd']
+            self.optimizers_list = ['adam','sgd']
 
         self.optimizer = None #NO se hace en constructor porque falta lr
         self.optimizer_name = self.optimizers_list[0] #Porque de momento se coge el primero para hacer pruebas
@@ -202,7 +203,7 @@ class  Model():
             hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
             self.hidden_activation_function_list = hidden_activation_function_list_lowercase
         else:
-            self.hidden_activation_function_list = ['relu','elu', 'silu']
+            self.hidden_activation_function_list = ['relu','elu']
         self.hidden_activation_function = self.available_hidden_activation_functions[
             self.hidden_activation_function_list[0]]
 
@@ -610,21 +611,22 @@ class  Model():
         return model
 
     def select_optimizer_params(self,hp):
-        nesterov_choice = hp.Boolean("nesterov", default=True)
-        beta1_choice = float(hp.Float("beta1",min_value=0.85, max_value=0.99))
-        beta2_choice = float(hp.Float("beta2",min_value=0.85, max_value=0.9999))
-        rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
 
         if self.optimizer_name == 'adamw':
+            beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
+            beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
             self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'adamax':
+            beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
+            beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
             self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'adafactor':
             self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr)
 
         if self.optimizer_name == 'adadelta':
+            rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
             self.optimizer = tf.keras.optimizers.Adadelta(learning_rate = self.lr,rho=rho_choice)
 
         if self.optimizer_name == 'adagrad':
@@ -636,20 +638,28 @@ class  Model():
             self.optimizer = tf.keras.optimizers.Ftrl(learning_rate = self.lr)
 
         if self.optimizer_name == 'lion':
+            beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
+            beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
             self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'adam':
+            beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
+            beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
             self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'rmsprop':
+            rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
             momentum_choice= float(hp.Float("momentum",min_value=0.7,max_value=0.9))
             self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice)
 
         if self.optimizer_name == 'nadam':
+            beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
+            beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
             self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
 
         if self.optimizer_name == 'sgd':
             momentum_choice = float(hp.Float("momentum",min_value=0.7, max_value=0.95))
+            nesterov_choice = hp.Boolean("nesterov", default=True)
             self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice)
 
         model = self.create_and_compile_model()
