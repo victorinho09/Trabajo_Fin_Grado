@@ -615,52 +615,52 @@ class  Model():
         if self.optimizer_name == 'adamw':
             beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
             beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
-            self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+            self.optimizer = tf.keras.optimizers.AdamW(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'adamax':
             beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
             beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
-            self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+            self.optimizer = tf.keras.optimizers.Adamax(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'adafactor':
-            self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr)
+            self.optimizer = tf.keras.optimizers.Adafactor(learning_rate = self.lr,clipnorm=1.0)
 
         if self.optimizer_name == 'adadelta':
             rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
-            self.optimizer = tf.keras.optimizers.Adadelta(learning_rate = self.lr,rho=rho_choice)
+            self.optimizer = tf.keras.optimizers.Adadelta(learning_rate = self.lr,rho=rho_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'adagrad':
             #Merece la pena finetunear algun hiperparametro aqui?
-            self.optimizer = tf.keras.optimizers.Adagrad(learning_rate = self.lr)
+            self.optimizer = tf.keras.optimizers.Adagrad(learning_rate = self.lr,clipnorm=1.0)
 
         if self.optimizer_name == 'ftrl':
             #Merece la pena finetunear algun hiperparametro aqui?
-            self.optimizer = tf.keras.optimizers.Ftrl(learning_rate = self.lr)
+            self.optimizer = tf.keras.optimizers.Ftrl(learning_rate = self.lr,clipnorm=1.0)
 
         if self.optimizer_name == 'lion':
             beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
             beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
-            self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+            self.optimizer = tf.keras.optimizers.Lion(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'adam':
             beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
             beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
-            self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+            self.optimizer = tf.keras.optimizers.Adam(learning_rate = self.lr,beta_1=beta1_choice,beta_2=beta2_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'rmsprop':
             rho_choice = float(hp.Float("rho", min_value=0.8, max_value=0.95))
             momentum_choice= float(hp.Float("momentum",min_value=0.7,max_value=0.9))
-            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice)
+            self.optimizer = tf.keras.optimizers.RMSprop(learning_rate=self.lr,rho=rho_choice,momentum=momentum_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'nadam':
             beta1_choice = float(hp.Float("beta1", min_value=0.85, max_value=0.99))
             beta2_choice = float(hp.Float("beta2", min_value=0.85, max_value=0.9999))
-            self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice)
+            self.optimizer = tf.keras.optimizers.Nadam(learning_rate=self.lr,beta_1=beta1_choice,beta_2=beta2_choice,clipnorm=1.0)
 
         if self.optimizer_name == 'sgd':
             momentum_choice = float(hp.Float("momentum",min_value=0.7, max_value=0.95))
             nesterov_choice = hp.Boolean("nesterov", default=True)
-            self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice)
+            self.optimizer = tf.keras.optimizers.SGD(learning_rate=self.lr,momentum=momentum_choice,nesterov=nesterov_choice,clipnorm=1.0)
 
         model = self.create_and_compile_model()
         return model

@@ -25,7 +25,7 @@ nombre_fichero_dataset = "mushroom"
 # nombre_fichero_dataset = "bank_marketing"
 
 for i in range(10):
-    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 2)
+    ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
 
 # for i in range(5):
 #     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
