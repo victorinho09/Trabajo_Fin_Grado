@@ -53,7 +53,9 @@ train_and_evaluate(data_iris,"iris",user_num_epochs=30)
 # print("Census_income dataset cargado")
 # train_and_evaluate(data_census_income,500, "logs/fit/census_income/500batches",16,"census_income")
 
-# data_phiusiil_phishing_url_website = fetch_ucirepo(id=967).data #clasificacion. --> NO CABE EN RAM, DA ERROR
+# data_phiusiil_phishing_url_website = fetch_ucirepo(id=967).data #clasificacion.
+
+
 # data_bike_sharing = fetch_ucirepo(id=275).data #regresion --> Este dataset funciona muy mal. ¿Mejorará con otra arquitectura?
 # data_real_estate_valuation = fetch_ucirepo(id=477).data #regresion --> Problema: Demasiado numero de clases objetivo, y muy pocas instancias, por lo que no da suficiente para que stratify funcione en testset, no consigue meter instancias en train y test set de igual manera
 # data_communities_and_crime = fetch_ucirepo(id=183).data #regresion --> Funciona muy mal tmb, muchas clases objetivo

@@ -20,67 +20,7 @@ He dejado solo relu/elu y adam/sgd
 
 Proponer gradient clipping para explosion de gradientes
 
-Search: Running Trial #10
+Hacer refactoring de numeros magicos
+añadir lr a user_params
 
-Value             |Best Value So Far |Hyperparameter
-0.89814           |0.98443           |beta1
-0.95853           |0.93494           |beta2
-
-Epoch 1/5
-143/143 ━━━━━━━━━━━━━━━━━━━━ 1s 1ms/step - accuracy: 0.9267 - loss: 0.1710 - val_accuracy: 0.9995 - val_loss: 7.1169e-04
-Epoch 2/5
-143/143 ━━━━━━━━━━━━━━━━━━━━ 0s 835us/step - accuracy: 0.9970 - loss: 0.0169 - val_accuracy: 1.0000 - val_loss: 5.6993e-04
-Epoch 3/5
-143/143 ━━━━━━━━━━━━━━━━━━━━ 0s 731us/step - accuracy: 0.9998 - loss: 0.0013 - val_accuracy: 0.9990 - val_loss: 0.0052
-Epoch 4/5
-143/143 ━━━━━━━━━━━━━━━━━━━━ 0s 836us/step - accuracy: 0.9988 - loss: 0.0021 - val_accuracy: 1.0000 - val_loss: 2.1662e-08
-Epoch 5/5
-143/143 ━━━━━━━━━━━━━━━━━━━━ 0s 805us/step - accuracy: 1.0000 - loss: 5.8916e-08 - val_accuracy: 1.0000 - val_loss: 1.4108e-09
-
-Trial 10 Complete [00h 00m 03s]
-val_loss: 1.4107651713501923e-09
-
-Best val_loss So Far: 0.0
-Total elapsed time: 00h 00m 30s
-----Parámetros del optimizador óptimos:
-Beta1: 0.9844308006538813
-Beta2: 0.934942042882409
-#########DEBUG##########
-Número de capas: 5
-Learning Rate: 0.01768143384227005
-Número de neuronas por capa: 79
-Función de activación: relu
-Optimizador: adam
-#########DEBUG##########
-Número de capas: 5
-Learning Rate: 0.01768143384227005
-Número de neuronas por capa: 79
-Función de activación: relu
-Optimizador: adam
-Epoch 1/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 1s 2ms/step - accuracy: 0.9507 - loss: 0.3931 - val_accuracy: 0.9959 - val_loss: 2.8667
-Epoch 2/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.9754 - loss: 2371.5588 - val_accuracy: 0.9426 - val_loss: 168120.1719
-Epoch 3/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.7852 - loss: 395088.3438 - val_accuracy: 0.9164 - val_loss: 46581407547392.0000
-Epoch 4/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 2ms/step - accuracy: 0.6986 - loss: 65582225424384.0000 - val_accuracy: 0.9097 - val_loss: 500740002938880.0000
-Epoch 5/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.7369 - loss: 647428134928384.0000 - val_accuracy: 0.6256 - val_loss: 2100755611779072.0000
-Epoch 6/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5474 - loss: 4564825459916800.0000 - val_accuracy: 0.5600 - val_loss: 43151094041280512.0000
-Epoch 7/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5296 - loss: nan - val_accuracy: 0.5308 - val_loss: nan
-Epoch 8/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5106 - loss: nan - val_accuracy: 0.5308 - val_loss: nan
-Epoch 9/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5201 - loss: nan - val_accuracy: 0.5308 - val_loss: nan
-Epoch 10/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5147 - loss: nan - val_accuracy: 0.5308 - val_loss: nan
-Epoch 11/1000
-285/285 ━━━━━━━━━━━━━━━━━━━━ 0s 1ms/step - accuracy: 0.5067 - loss: nan - val_accuracy: 0.5308 - val_loss: nan
-Epoch 11: early stopping
-Restoring model weights from the end of the best epoch: 1.
-Se hace la evaluacion:
-102/102 ━━━━━━━━━━━━━━━━━━━━ 0s 284us/step - accuracy: 0.9950 - loss: 2.1807
-Máximo número de neuronas por capa: 80
+EJ: 10 datasets probados. Entrar en detalle 4.
