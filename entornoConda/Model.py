@@ -2,17 +2,16 @@ import math
 import time
 
 import keras_tuner as kt
-
-import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
-from funciones_auxiliares import get_num_epochs_train, dividir_array, get_num_batches_per_epoch
+from funciones_auxiliares import get_num_batches_per_epoch
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,batch_size,num_batches=None,X_val=None,y_val=None,
+    def __init__(self,X_train,y_train,log_dir,X_val=None,y_val=None,
+                 user_batch_size=None,
                  user_num_epochs=None,
                  user_max_trials= None,
                  user_min_num_hidden_layers: int = None,
@@ -20,17 +19,21 @@ class  Model():
                  user_min_num_neurons_per_hidden: int = None,
                  user_max_num_neurons_per_hidden: int = None,
                  user_optimizers_list: list = None,
-                 user_hidden_activation_function_list: list = None
+                 user_hidden_activation_function_list: list = None,
+                 user_lr = None
                  ):
 
-        global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
-        global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
+        # global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
+        # global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
+        # tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
 
         # atributos de parametros pasados al fit method de funcion train
         self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
         self.shuffle = True  # Para que baraje los datos antes de la división del val set
-        self.batch_size = batch_size
+        if user_batch_size is not None:
+            self.batch_size = user_batch_size
+        else:
+            self.batch_size = 16
         self.verbose = 1
         self.log_dir = log_dir
 
@@ -43,8 +46,8 @@ class  Model():
             restore_best_weights=True,
             min_delta=1e-4
         )
-
-        self.callbacks = [tb_callback, global_epoch_logger, global_batch_logger,early_stop]
+        #tb_callback, global_epoch_logger, global_batch_logger,
+        self.callbacks = [early_stop]
 
         #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
         if  (X_val is None) or (y_val is None) :
@@ -59,21 +62,23 @@ class  Model():
 
         self.num_clases_target = self.y_train.shape[1]
 
-        self.num_batches = num_batches
+        # self.num_batches = user_num_batches
         if user_num_epochs is not None:
             self.num_epochs = user_num_epochs
-            self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=batch_size)
+            #self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=self.batch_size)
         else:
-            self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
+            self.num_epochs = 10
+            # self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
         self.num_epochs_tuner = self.num_epochs
-        # print(f"Numero de epocas: {self.num_epochs_tuner}")
+        ################HASTA AQUI HIPERPARAMETROS DE ENTRENAMIENTO
 
         self.history = None #No obtendrá valor hasta que se entrene el modelo
         self.num_hidden_layers = None
-        self.lr = None
+        if user_lr is not None:
+            self.lr = user_lr
+        else:
+            self.lr = None
         self.num_neurons_per_hidden = 5
-
-        self.initialize_optimizer_variables(user_optimizers_list)
 
         self.initialize_hidden_function_variables(user_hidden_activation_function_list)
 
@@ -87,6 +92,8 @@ class  Model():
 
         self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
         self.max_lr = 1e-2
+
+        self.initialize_optimizer_variables(user_optimizers_list)
 
         self.initialize_tuner_variables(user_max_trials)
 
@@ -155,7 +162,7 @@ class  Model():
             optimizers_list_lowercase = [s.lower() for s in user_optimizers_list]
             self.optimizers_list =  optimizers_list_lowercase
         else:
-            self.optimizers_list = ['adam','sgd']
+            self.optimizers_list = ['adam','sgd','rmsprop']
 
         self.optimizer = None #NO se hace en constructor porque falta lr
         self.optimizer_name = self.optimizers_list[0] #Porque de momento se coge el primero para hacer pruebas
@@ -168,20 +175,13 @@ class  Model():
     def initialize_hidden_function_variables(self,user_hidden_activation_function_list = None):
         # Traduccion de las funciones de activacion disponibles por tf.keras
         self.available_hidden_activation_functions = {
-            # "celu": tf.keras.activations.celu, NO HAY SOPORTE DESDE TF.KERAS, solo desde keras. ¿tf.nn.ceu? -> no me la detecta
-            # "glu": tf.keras.activations.glu,
-            # "hard_shrink": tf.keras.activations.hard_shrink,
-            # "hard_sigmoid": tf.keras.activations.hard_sigmoid,
-            # "hard_tanh": tf.keras.activations.hard_tanh,
             "leaky_relu": tf.keras.activations.leaky_relu,
-            # "log_sigmoid": tf.keras.activations.log_sigmoid,
             "mish": tf.keras.activations.mish,
             "relu": tf.keras.activations.relu,
             "sigmoid": tf.keras.activations.sigmoid,
             "softmax": tf.keras.activations.softmax,
             "softplus": tf.keras.activations.softplus,
             "softsign": tf.keras.activations.softsign,
-            # "soft_shrink": tf.keras.activations.soft_shrink,
             "tanh": tf.keras.activations.tanh,
             "selu": tf.keras.activations.selu,
             "elu": tf.keras.activations.elu,
@@ -190,11 +190,6 @@ class  Model():
             "gelu": tf.keras.activations.gelu,
             "silu": tf.keras.activations.swish,
             "swish": tf.keras.activations.swish,
-            # "sparse_plus": tf.keras.activations.sparse_plus,
-            # "sparsemax": tf.keras.activations.sparsemax,
-            # "squareplus": tf.keras.activations.squareplus,
-            # "tanh_shrink": tf.keras.activations.tanh_shrink,
-            # "threshold": tf.keras.activations.threshold
         }
 
         # Se comprueba si el parametro opcional viene dado o no
@@ -203,9 +198,8 @@ class  Model():
             hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
             self.hidden_activation_function_list = hidden_activation_function_list_lowercase
         else:
-            self.hidden_activation_function_list = ['relu','elu']
-        self.hidden_activation_function = self.available_hidden_activation_functions[
-            self.hidden_activation_function_list[0]]
+            self.hidden_activation_function_list = ['relu','elu', 'silu']
+        self.hidden_activation_function = self.available_hidden_activation_functions[self.hidden_activation_function_list[0]]
 
     def initialize_tuner_variables(self,user_max_trials=None):
         # atributos de parametros pasados al tuner
@@ -377,7 +371,6 @@ class  Model():
 
     def assign_optimizer_to_model(self):
         # Se traduce el optimizador de string -> funcion de tf.keras
-        #self.optimizer = self.available_optimizers[self.best_hyperparameters['optimizer']] No hace falta inicializarlo, ya que se hara ahora despues en la quinta vuelta
         self.optimizer_name = self.best_hyperparameters['optimizer']
         print(f"Optimizador óptimo: {self.best_hyperparameters['optimizer']}")
 
@@ -678,32 +671,15 @@ class  Model():
             callbacks=self.callbacks
         )
         #Obtenemos las metricas
-        self.set_metrics(self.callbacks[2])
+        # self.set_metrics(self.callbacks[2])
 
-    def set_metrics(self,global_batch_logger):
 
-        #print(self.history.history.keys())
-        metric_val_accuracy = self.history.history["val_accuracy"]
-        metric_val_loss = self.history.history["val_loss"]
-        metric_loss_per_batch = dividir_array(global_batch_logger.batch_loss_acum, self.num_batches_per_epoch)
-        metric_accuracy_per_batch = dividir_array(global_batch_logger.batch_accuracy_acum, self.num_batches_per_epoch)
+    #def set_metrics(self,global_batch_logger):
 
-        # print("Número de elementos en val_accuracy: ", len(metric_val_accuracy))
-        # print("Número de elementos en val_loss: ", len(metric_val_loss))
-        # print("Número de elementos/listas en loss_per_batch: ", len(metric_loss_per_batch))
-        # print("Número de elementos/listas en accuracy_per_batch: ", len(metric_accuracy_per_batch))
-
-        # print("Número de batches por época: ",num_batches_per_epoch)
-        # print("metric_loss_per_batch: ", metric_loss_per_batch)
-        # print("metric_accuracy_per_batch",metric_accuracy_per_batch)
-
-        #for epoch in range(self.num_epochs):
-            #info_epoch = [metric_accuracy_per_batch[epoch], metric_loss_per_batch[epoch], metric_val_accuracy[epoch],
-            #              metric_val_loss[epoch]]
-            #self.metrics.append(info_epoch)
-            #print(info_epoch)
-            # print(epoch)
-
+    #    metric_val_accuracy = self.history.history["val_accuracy"]
+    #    metric_val_loss = self.history.history["val_loss"]
+    #    metric_loss_per_batch = dividir_array(global_batch_logger.batch_loss_acum, self.num_batches_per_epoch)
+    #    metric_accuracy_per_batch = dividir_array(global_batch_logger.batch_accuracy_acum, self.num_batches_per_epoch)
 
     def evaluate(self,X_test, y_test):
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy

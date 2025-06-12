@@ -1,26 +1,7 @@
--Tanto en seleccion de numero de neurons como en numero de capas, poner sampling= log en caso de mucha distancia entre min y max? -No prioritario
--AL llamar a Model ¿Pedir numero de batches obligatorio o numero de epocas o ninguno de ellos y fijar valor default? -No prioritario
--He quitado la posibilidad de introducir numero de neuronas por capas oculta (comentado) -No prioritario
-
-limitar a 6 capas ocultas - OK
-meter early stopping con paciencia elevada (10) y restaurando pesos de la mejor epoca Restore_best_weights. val_loss. NO poner num_neuronas igual que busqueda -OK
-Meter en fichero de info el balanceo de instancias de clases target. 50/50 - OK
-aumentar busqueda select_optimizer_and_lr le * 10. Verificar que el resultado no se va de los limites de originales. - OK
-Mirar posible error al calcular loss al final del entrenamiento correcto - OK .SI devuelve bien la loss
-cambio codigo select_optimizer_params
-
-Momentum 0.7-0.9 para probar
-Todas las iteraciones que dan loss alta tiene en comun:
--Numero de neuronas cercano al limite superior
--rmsprop con leaky relu -> Cambiado
-
-siguen dando malos valores cuando se usa un numero de neuronas por capa muy alto y numero de capas 5 o 6
-cambio de numero maximo de neuronas por capa
-He dejado solo relu/elu y adam/sgd
-
-Proponer gradient clipping para explosion de gradientes
 
 Hacer refactoring de numeros magicos
 añadir lr a user_params
+
+Incluir posibilidad de pasar dataset a inicializacion de clase model sin preprocesamiento
 
 EJ: 10 datasets probados. Entrar en detalle 4.

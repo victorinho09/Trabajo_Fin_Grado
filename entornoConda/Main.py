@@ -1,10 +1,22 @@
 from ucimlrepo import fetch_ucirepo
-import tensorflow as tf
+from Model import Model
 from entrenamiento import train_and_evaluate
+from preprocesamiento import preprocess_dataset
 
 data_iris = fetch_ucirepo(id=53).data #clasificacion
 print("Iris dataset cargado")
 train_and_evaluate(data_iris,"iris",user_num_epochs=30)
+
+# El user si quiere preprocesar dataset le damos la funcion para que lo haga
+X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(data_iris,"iris")
+model = Model(X_train_scaled, y_train_encoded,"directorio logs")
+model.autotune()
+model.train()
+loss,precision=model.evaluate(X_test_scaled, y_test_encoded)
+hiperparams_and_params = model.get_final_hyperparams_and_params()
+# El user deberá pasar el dataset a la inicializacion del modelo
+
+
 
 # data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
 # print("Heart_disease dataset cargado")
@@ -54,9 +66,3 @@ train_and_evaluate(data_iris,"iris",user_num_epochs=30)
 # train_and_evaluate(data_census_income,500, "logs/fit/census_income/500batches",16,"census_income")
 
 # data_phiusiil_phishing_url_website = fetch_ucirepo(id=967).data #clasificacion.
-
-
-# data_bike_sharing = fetch_ucirepo(id=275).data #regresion --> Este dataset funciona muy mal. ¿Mejorará con otra arquitectura?
-# data_real_estate_valuation = fetch_ucirepo(id=477).data #regresion --> Problema: Demasiado numero de clases objetivo, y muy pocas instancias, por lo que no da suficiente para que stratify funcione en testset, no consigue meter instancias en train y test set de igual manera
-# data_communities_and_crime = fetch_ucirepo(id=183).data #regresion --> Funciona muy mal tmb, muchas clases objetivo
-# data_parkinsons_telemonitoring = fetch_ucirepo(id=189).data #regresion -->No coge datos, no contiene nada

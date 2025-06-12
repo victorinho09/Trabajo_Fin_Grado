@@ -1,0 +1,110 @@
+nombre_dataset = car_evaluation
+loss = 0.014991258271038532
+precision = 0.9942196607589722
+lr = 0.027910849723740316
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 18
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.287825345993042
+precision = 0.8815028667449951
+lr = 0.03737737169674513
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 14
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.00031354298698715866
+precision = 1.0
+lr = 0.008951262770334483
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 14
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.07517758756875992
+precision = 0.9710982441902161
+lr = 0.015402950870975757
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 18
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.34654977917671204
+precision = 0.8901734352111816
+lr = 0.037829570022616096
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 18
+numero_capas_ocultas = 2
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.027622152119874954
+precision = 0.9971098303794861
+lr = 0.004803434085716022
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 18
+numero_capas_ocultas = 4
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.05189850553870201
+precision = 0.9913294911384583
+lr = 0.005215881814181889
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 17
+numero_capas_ocultas = 5
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.020313894376158714
+precision = 0.9913294911384583
+lr = 0.006347346235322246
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 13
+numero_capas_ocultas = 5
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.01054336503148079
+precision = 0.9942196607589722
+lr = 0.025662108287864277
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 16
+numero_capas_ocultas = 2
+numero_epocas = 10
+max_trials = 10
+####################################
+nombre_dataset = car_evaluation
+loss = 0.10436692833900452
+precision = 0.9855491518974304
+lr = 0.015197498308724293
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 17
+numero_capas_ocultas = 3
+numero_epocas = 10
+max_trials = 10
+####################################

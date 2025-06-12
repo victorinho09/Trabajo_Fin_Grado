@@ -24,6 +24,27 @@ nombre_fichero_dataset = "mushroom"
 # data = fetch_ucirepo(id=222).data #clasificacion
 # nombre_fichero_dataset = "bank_marketing"
 
+# data = fetch_ucirepo(id=350).data #clasificacion
+# nombre_fichero_dataset = "default_payment"
+
+# data= fetch_ucirepo(id=19).data #clasificacion
+# nombre_fichero_dataset = "car_evaluation"
+
+# data = fetch_ucirepo(id=602).data #clasificacion
+# nombre_fichero_dataset = "dry_bean"
+
+# data = fetch_ucirepo(id=159).data #clasificacion
+# nombre_fichero_dataset = "magic_gamma_telescope"
+
+# data = fetch_ucirepo(id=94).data #clasificacion
+# nombre_fichero_dataset = "spambase"
+
+# data = fetch_ucirepo(id=20).data #clasificacion
+# nombre_fichero_dataset = "census_income"
+
+# data = fetch_ucirepo(id=967).data #clasificacion.
+# nombre_fichero_dataset = "phiusiil_phising_url"
+
 for i in range(10):
     ejecutar_prueba_interna(data, nombre_fichero_dataset, 5, 10)
 

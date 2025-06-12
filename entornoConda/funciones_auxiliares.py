@@ -66,18 +66,14 @@ def get_y_target_col(data_obj):
 
 # Esta función te da el numero de epocas que se ejecutaran si quieres que se ejecuten un numero de batches concreto.
 # No es un numero de epocas exacto, ya que redondeamos hacia arriba. 3,1 epochs -> 4 epochs
-def get_num_epochs_train(
-        batch_size,
-        X_train_scaled,
-        desired_batches,
-        validation_split_value
-):
-    num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=validation_split_value,filas=X_train_scaled.shape[0],batch_size=batch_size)
-    if (num_batches_per_epoch > desired_batches):
-        print(
-            "No se llega a ejecutar 1 epoca entera --> numEpochs = 0????")  # preguntar: ¿Queremos comparar ejecuciones con las epochs?
-    numEpochs = math.ceil(desired_batches / num_batches_per_epoch)
-    return numEpochs, num_batches_per_epoch
+# def get_num_epochs_train(
+#         batch_size,
+#         X_train_scaled,
+#         validation_split_value
+# ):
+#     num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=validation_split_value,filas=X_train_scaled.shape[0],batch_size=batch_size)
+#     numEpochs = math.ceil(desired_batches / num_batches_per_epoch)
+#     return numEpochs, num_batches_per_epoch
 
 def get_num_batches_per_epoch(validation_split_value,filas,batch_size):
     total_samples =  ((1-validation_split_value) * filas)

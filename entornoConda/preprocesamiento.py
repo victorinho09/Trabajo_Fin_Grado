@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from funciones_auxiliares import get_y_target_col
 
 
-def preprocess_data(data,nombre_fichero_info_dataset):
+def preprocess_dataset(data,nombre_fichero_info_dataset):
 
     directorio_info_datasets = "./info_datasets"
     os.makedirs(directorio_info_datasets,exist_ok=True)
