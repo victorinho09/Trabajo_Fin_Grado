@@ -1,0 +1,11 @@
+nombre_dataset = mushroom
+loss = 2.4793612283247057e-06
+precision = 1.0
+lr = 0.00045472246233106147
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 76
+numero_capas_ocultas = 5
+numero_epocas = 12
+max_trials = 10
+####################################

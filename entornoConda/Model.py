@@ -23,13 +23,25 @@ class  Model():
                  user_lr = None
                  ):
 
+        self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
+        self.shuffle = True  # Para que baraje los datos antes de la división del val set
+        # Se cogen los datos de validación por paramétro si existen, si no se crean del train set
+        if (X_val is None) or (y_val is None):
+            # hacer split del train
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train,
+                                                                                  test_size=self.validation_split)  # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
+        else:
+            self.X_val = X_val
+            self.y_val = y_val
+            self.X_train = X_train
+            self.y_train = y_train
+        self.validation_data = (self.X_val, self.y_val)
+
         # global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
         # global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
         # tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
 
         # atributos de parametros pasados al fit method de funcion train
-        self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
-        self.shuffle = True  # Para que baraje los datos antes de la división del val set
         if user_batch_size is not None:
             self.batch_size = user_batch_size
         else:
@@ -49,65 +61,54 @@ class  Model():
         #tb_callback, global_epoch_logger, global_batch_logger,
         self.callbacks = [early_stop]
 
-        #Se cogen los datos de validación por paramétro si existen, si no se crean del train set
-        if  (X_val is None) or (y_val is None) :
-            #hacer split del train
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train, test_size=self.validation_split) # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
-        else:
-            self.X_val= X_val
-            self.y_val= y_val
-            self.X_train = X_train
-            self.y_train = y_train
-        self.validation_data = (self.X_val,self.y_val)
 
         self.num_clases_target = self.y_train.shape[1]
+        #Se entrena siempre 1000 epocas ya que se aplica early stopping
+        self.num_epochs_final_training = 1000
 
         # self.num_batches = user_num_batches
-        if user_num_epochs is not None:
-            self.num_epochs = user_num_epochs
-            #self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=self.batch_size)
-        else:
-            self.num_epochs = 10
-            # self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
-        self.num_epochs_tuner = self.num_epochs
-        ################HASTA AQUI HIPERPARAMETROS DE ENTRENAMIENTO
-
-        self.history = None #No obtendrá valor hasta que se entrene el modelo
-        self.num_hidden_layers = None
-        if user_lr is not None:
-            self.lr = user_lr
-        else:
-            self.lr = None
-        self.num_neurons_per_hidden = 5
-
-        self.initialize_hidden_function_variables(user_hidden_activation_function_list)
-
-        self.output_activation_function = 'softmax'
-        self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
-        self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
-
-        self.initialize_num_neurons_per_hidden_variables(user_min_num_neurons_per_hidden,user_max_num_neurons_per_hidden)
-
-        self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_hidden_layers)
-
-        self.min_lr = 1e-6 #Minimiza ConvergenceWarnings en iris almenos
-        self.max_lr = 1e-2
-
-        self.initialize_optimizer_variables(user_optimizers_list)
-
-        self.initialize_tuner_variables(user_max_trials)
-
-        self.bayesian_opt_tuner = None
-        self.best_hyperparameters = None
-        self.metrics = []
-        self.model = None
 
         if self.num_clases_target == 2:
             self.loss = "binary_crossentropy"
         else:
             self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
+        ################HASTA AQUI HIPERPARAMETROS DE ENTRENAMIENTO
+
+        self.history = None #No obtendrá valor hasta que se entrene el modelo
+
+        if user_lr is not None:
+            self.lr = user_lr
+        else:
+            self.lr = None
+
+        self.min_lr = 1e-6  # Minimiza ConvergenceWarnings en iris almenos
+        self.max_lr = 1e-2
+
+        self.initialize_hidden_function_variables(user_hidden_activation_function_list)
+
+        self.num_neurons_output_layer = self.y_train.shape[1]  # Depende de la estructura de y_train
+        self.num_neurons_input_layer = (self.X_train.shape[1],)  # Depende de la estructura de X_train
+        if self.num_neurons_output_layer == 2:
+            self.output_activation_function = "sigmoid"
+        else:
+            self.output_activation_function = 'softmax'
+
+        self.initialize_num_neurons_per_hidden_variables(user_min_num_neurons_per_hidden,user_max_num_neurons_per_hidden)
+
+        self.num_hidden_layers = None
+        self.initialize_num_hidden_layers_variables(user_min_num_hidden_layers,user_max_num_hidden_layers)
+
+        self.initialize_optimizer_variables(user_optimizers_list)
+
+        self.initialize_tuner_variables(user_max_trials,user_num_epochs)
+
+        self.best_hyperparameters = None
+        self.metrics = []
+        self.model = None
+
     def initialize_num_neurons_per_hidden_variables(self,user_min_num_neurons_per_hidden=None,user_max_num_neurons_per_hidden=None):
+        self.num_neurons_per_hidden = 10
         self.min_num_neurons_per_hidden = 5
         self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
         self.use_user_param_values = False
@@ -201,12 +202,23 @@ class  Model():
             self.hidden_activation_function_list = ['relu','elu', 'silu']
         self.hidden_activation_function = self.available_hidden_activation_functions[self.hidden_activation_function_list[0]]
 
-    def initialize_tuner_variables(self,user_max_trials=None):
+    def initialize_tuner_variables(self,user_max_trials=None,user_num_epochs=None):
+
+        if user_num_epochs is not None:
+            self.num_epochs_tuner = user_num_epochs
+            #self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=self.batch_size)
+        else:
+            self.num_epochs_tuner = 10
+            # self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
+
+
         # atributos de parametros pasados al tuner
         if user_max_trials is not None:
             self.max_trials = user_max_trials
         else:
             self.max_trials = 15
+
+        self.bayesian_opt_tuner = None
 
         #El número de max_trials para buscar función de activación será igual a la longitud de la lista de funciones de activación
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
@@ -665,11 +677,12 @@ class  Model():
             self.y_train,
             validation_data=self.validation_data,
             shuffle=self.shuffle,
-            epochs= 1000, #Se ponen muchas épocas, ya que se quiere que el modelo se entrene bien, independientemente del resto de tiempo de búsquedda de hiperparámetros. Con el early stopping para de entrenar
+            epochs= self.num_epochs_final_training, #Se ponen muchas épocas, ya que se quiere que el modelo se entrene bien, independientemente del resto de tiempo de búsquedda de hiperparámetros. Con el early stopping para de entrenar
             batch_size=self.batch_size,
             verbose=self.verbose,
             callbacks=self.callbacks
         )
+        self.num_epochs_trained = len(self.history.history['loss'])
         #Obtenemos las metricas
         # self.set_metrics(self.callbacks[2])
 
@@ -688,7 +701,7 @@ class  Model():
         return self.model.evaluate(X_test, y_test,batch_size=self.batch_size)
 
     def get_final_hyperparams_and_params(self):
-        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs,self.max_trials]
+        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs_trained,self.max_trials]
 
     def debugHyperparams(self):
         print(f"#########DEBUG##########")
