@@ -1,7 +1,9 @@
 
 Hacer refactoring de numeros magicos
-añadir lr a user_params
-
-Incluir posibilidad de pasar dataset a inicializacion de clase model sin preprocesamiento
+comprobar funcionamiento de num_neurons_per_hidden y user_lr. Hacerlo debuggando viendo si entra en la funcion
+Cuando tenga las graficas generadas, mirar si quitar GlobalBatchLog y EpochCumuluta ya que no se usaran las
+callbacks, pero si dejar los ficheros
+quitar warnings de lr
+caso de que min y max sean iguales no hace falta busqueda
 
 EJ: 10 datasets probados. Entrar en detalle 4.

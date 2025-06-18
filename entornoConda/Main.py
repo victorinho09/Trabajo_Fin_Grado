@@ -3,13 +3,17 @@ from Model import Model
 from entrenamiento import train_and_evaluate
 from preprocesamiento import preprocess_dataset
 
-data_iris = fetch_ucirepo(id=53).data #clasificacion
-print("Iris dataset cargado")
-train_and_evaluate(data_iris,"iris",user_num_epochs=30)
+#data_iris = fetch_ucirepo(id=53).data #clasificacion
+#print("Iris dataset cargado")
+#train_and_evaluate(data_iris,"iris",user_num_epochs=30)
+
+data_mushroom = fetch_ucirepo(id=73).data #clasificacion
+print("Mushroom dataset cargado")
+#train_and_evaluate(data_mushroom,500, "logs/fit/mushroom/500batches",16,"mushroom")
 
 # El user si quiere preprocesar dataset le damos la funcion para que lo haga
-X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(data_iris,"iris")
-model = Model(X_train_scaled, y_train_encoded,"directorio logs")
+X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(data_mushroom,"mushroom")
+model = Model(X_train_scaled, y_train_encoded,"directorio logs",user_max_trials=3,user_min_num_hidden_layers=6,user_max_num_hidden_layers=6,user_min_num_neurons_per_hidden=3,user_max_num_neurons_per_hidden=3)
 model.autotune()
 model.train()
 loss,precision=model.evaluate(X_test_scaled, y_test_encoded)
@@ -34,10 +38,6 @@ hiperparams_and_params = model.get_final_hyperparams_and_params()
 # data_bank_marketing = fetch_ucirepo(id=222).data #clasificacion
 # print("Bank_marketing dataset cargado")
 # train_and_evaluate(data_bank_marketing,500, "logs/fit/bank_marketing/500batches",16,"bank_marketing")
-
-# data_mushroom = fetch_ucirepo(id=73).data #clasificacion
-# print("Mushroom dataset cargado")
-# train_and_evaluate(data_mushroom,500, "logs/fit/mushroom/500batches",16,"mushroom")
 
 
 # data_default_payment = fetch_ucirepo(id=350).data #clasificacion

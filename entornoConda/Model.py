@@ -11,16 +11,16 @@ from funciones_auxiliares import get_num_batches_per_epoch
 
 class  Model():
     def __init__(self,X_train,y_train,log_dir,X_val=None,y_val=None,
-                 user_batch_size=None,
-                 user_num_epochs=None,
-                 user_max_trials= None,
-                 user_min_num_hidden_layers: int = None,
-                 user_max_num_hidden_layers: int = None,
+                 user_batch_size=None, #
+                 user_num_epochs=None, #
+                 user_max_trials= None, #
+                 user_min_num_hidden_layers: int = None,    #
+                 user_max_num_hidden_layers: int = None,    #
                  user_min_num_neurons_per_hidden: int = None,
                  user_max_num_neurons_per_hidden: int = None,
-                 user_optimizers_list: list = None,
-                 user_hidden_activation_function_list: list = None,
-                 user_lr = None
+                 user_optimizers_list: list = None, #
+                 user_hidden_activation_function_list: list = None, #
+                 user_lr = None #
                  ):
 
         self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
@@ -79,8 +79,10 @@ class  Model():
 
         if user_lr is not None:
             self.lr = user_lr
+            self.search_lr = False
         else:
-            self.lr = None
+            self.lr = 1e-5
+            self.search_lr = True
 
         self.min_lr = 1e-6  # Minimiza ConvergenceWarnings en iris almenos
         self.max_lr = 1e-2
@@ -109,38 +111,35 @@ class  Model():
 
     def initialize_num_neurons_per_hidden_variables(self,user_min_num_neurons_per_hidden=None,user_max_num_neurons_per_hidden=None):
         self.num_neurons_per_hidden = 10
+        self.search_num_neurons_per_hidden = True
+        self.threshold_num_neurons_per_hidden_less_than = 10
         self.min_num_neurons_per_hidden = 5
-        self.threshold_num_neurons_per_hidden = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
+        self.threshold_num_neurons_per_hidden_log = 100  # numero de features a partir del cual la búsqueda del número se hace logarítmica
         self.use_user_param_values = False
         self.max_num_neurons_per_hidden = math.ceil((2/3) * self.X_train.shape[1] + self.y_train.shape[1])
-        print(f"Máximo número de neuronas por capa: {self.max_num_neurons_per_hidden}")
 
-        # if user_min_num_neurons_per_hidden is not None:
-        #     if user_max_num_neurons_per_hidden is not None:
-        #         #Se ha recibido min y max neurons per hidden layers por parametro
-        #         #Se comprueba que el mínimo no es mayor que el máximo
-        #         if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
-        #             self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-        #             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-        #             self.use_user_param_values = True
-        #         else:
-        #             print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
-        #
-        #     else:
-        #         #solo se ha recibido min neurons per hidden layers por parametro
-        #         self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-        #         self.use_user_param_values= True
-        #
-        # else:
-        #     if user_max_num_neurons_per_hidden is not None:
-        #         #Solo se ha recibido max neurons per hidden layers por parametro
-        #         if self.min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
-        #             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-        #             self.use_user_param_values=True
-        #
-        #         else:
-        #             print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
-        #     print(f"Valor de max_num_neurons: {self.max_num_neurons_per_hidden}. Debe devolver none")
+        if user_min_num_neurons_per_hidden is not None:
+             if user_max_num_neurons_per_hidden is not None:
+                 #Se ha recibido min y max neurons per hidden layers por parametro
+                 if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+                     self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                     self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                 elif user_min_num_neurons_per_hidden == user_max_num_neurons_per_hidden:
+                     self.num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                     self.search_num_neurons_per_hidden = False
+                 else:
+                     print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
+             else:
+                 #solo se ha recibido min neurons per hidden layers por parametro
+                 self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+        else:
+             if user_max_num_neurons_per_hidden is not None:
+                 #Solo se ha recibido max neurons per hidden layers por parametro
+                 if user_max_num_neurons_per_hidden > self.min_num_neurons_per_hidden:
+                     self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                 else:
+                     print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
+             print(f"Valor de max_num_neurons: {self.max_num_neurons_per_hidden}. Debe devolver none")
 
     def initialize_optimizer_variables(self,user_optimizers_list = None):
 
@@ -236,6 +235,7 @@ class  Model():
     def initialize_num_hidden_layers_variables(self,user_min_num_hidden_layers=None,user_max_num_hidden_layers=None):
         self.min_num_hidden_layers = 2
         self.max_num_hidden_layers = 6  #Habia demasiadas capas si se ponia la raiz del numero de features
+        self.search_num_hidden_layers = True
 
         if user_min_num_hidden_layers is not None:
             if user_max_num_hidden_layers is not None:
@@ -243,7 +243,9 @@ class  Model():
                 if user_min_num_hidden_layers < user_max_num_hidden_layers:
                     self.min_num_hidden_layers = user_min_num_hidden_layers
                     self.max_num_hidden_layers = user_max_num_hidden_layers
-
+                elif user_min_num_hidden_layers == user_max_num_hidden_layers:
+                    self.num_hidden_layers = user_max_num_hidden_layers
+                    self.search_num_hidden_layers = False
                 else:
                     print(f"El valor máximo introducido({user_max_num_hidden_layers}) es menor que el mínimo introducido({user_min_num_hidden_layers}). Se cogerán valores por defecto.")
 
@@ -259,49 +261,63 @@ class  Model():
                 if user_max_num_hidden_layers > self.min_num_hidden_layers:
                     self.max_num_hidden_layers = user_max_num_hidden_layers
                 else:
-                    print(f"Máximo de capas ocultas introducido ({user_max_num_hidden_layers}) es menor que el mínimo por defecto ({self.min_num_hidden_layers}). Se cogerán valores por defecto")
+                    print(f"Máximo de capas ocultas introducido ({user_max_num_hidden_layers}) es menor o igual que el mínimo por defecto ({self.min_num_hidden_layers}). Se cogerán valores por defecto")
 
     def autotune(self):
 
         ####PRIMERA VUELTA####
-        #Se deciden numero de capas ocultas y una primera aprox de lr
-        self.bayesian_opt_tuner = kt.BayesianOptimization(
-            self.select_num_hidden_layers_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
-            directory=self.directory, project_name='num_hidden_layers_and_lr'
-        )
-        #deja en los atributos de la clase los resultados del fine tuning
-        self.search()
+        if self.search_num_hidden_layers:
+            if self.search_lr:
+                #Se deciden numero de capas ocultas y una primera aprox de lr
+                self.bayesian_opt_tuner = kt.BayesianOptimization(
+                    self.select_num_hidden_layers_and_lr, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
+                    directory=self.directory, project_name='num_hidden_layers_and_lr'
+                )
+                #deja en los atributos de la clase los resultados del fine tuning
+                self.search()
 
-        #asignamos resultados de la primera vuelta:
-        self.assign_num_hidden_layers_to_model()
-        self.assign_lr_to_model()
+                #asignamos resultados de la primera vuelta:
+                self.assign_num_hidden_layers_to_model()
+                self.assign_lr_to_model()
+            else:
+                self.bayesian_opt_tuner = kt.BayesianOptimization(
+                    self.select_num_hidden_layers, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
+                    directory=self.directory, project_name='num_hidden_layers_and_lr'
+                )
+                # deja en los atributos de la clase los resultados del fine tuning
+                self.search()
 
+                # asignamos resultados de la primera vuelta:
+                self.assign_num_hidden_layers_to_model()
+        else:
+            print(f"\nSaltando búsqueda de num_hidden_layers. El usuario ya ha fijado el valor por defecto: {self.num_hidden_layers}\n")
         self.debugHyperparams()
 
         ####SEGUNDA VUELTA###
-        #Se deciden numero de neuronas por capa y nueva aprox de lr
+        #Se deciden numero de neuronas por capa
 
-        if self.X_train.shape[1] >= self.min_num_neurons_per_hidden:
+        if self.search_num_neurons_per_hidden:
+            if self.X_train.shape[1] >= self.threshold_num_neurons_per_hidden_less_than:
 
-            self.bayesian_opt_tuner = kt.BayesianOptimization(
-                self.select_num_neurons_per_hidden, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
-                directory=self.directory, project_name='num_neurons_per_hidden'
-            )
+                self.bayesian_opt_tuner = kt.BayesianOptimization(
+                    self.select_num_neurons_per_hidden, objective=self.objective, max_trials=self.max_trials, overwrite=self.overwrite,
+                    directory=self.directory, project_name='num_neurons_per_hidden'
+                )
 
-            # deja en los atributos de la clase los resultados del fine tuning
-            self.search()
+                # deja en los atributos de la clase los resultados del fine tuning
+                self.search()
 
-            # asignamos resultados de la segunda vuelta:
-            self.assign_num_neurons_per_hidden_to_model()
+                # asignamos resultados de la segunda vuelta:
+                self.assign_num_neurons_per_hidden_to_model()
+            else:
+                self.num_neurons_per_hidden = self.threshold_num_neurons_per_hidden_less_than  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
         else:
-            self.num_neurons_per_hidden = 10  # SI EL NUMERO DE FEATURES ES INFERIOR A 10, COGER 10 NEURONAS POR CAPA.
-
+            print(f"\nSaltando búsqueda de num_neurons_per_hidden. El usuario ya ha fijado el valor por defecto: {self.num_neurons_per_hidden}\n")
 
         self.debugHyperparams()
 
         ####TERCERA VUELTA
         # Se decide funcion de activacion de las capas ocultas
-
         self.bayesian_opt_tuner = kt.GridSearch(
             self.select_activation_function, objective=self.objective, max_trials=self.max_trials_activation_function_tuner,overwrite=self.overwrite,
             directory=self.directory, project_name='activation_function'
@@ -316,33 +332,45 @@ class  Model():
         self.debugHyperparams()
 
         ####Cuarta VUELTA####
-        self.bayesian_opt_tuner = kt.BayesianOptimization(
-            self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials_optimizer_tuner, overwrite=self.overwrite,
-            directory=self.directory, project_name='optimizer_and_lr'
-        )
+        if self.search_lr:
+            self.bayesian_opt_tuner = kt.BayesianOptimization(
+                self.select_optimizer_and_lr, objective=self.objective, max_trials=self.max_trials_optimizer_tuner, overwrite=self.overwrite,
+                directory=self.directory, project_name='optimizer_and_lr'
+            )
 
-        # deja en los atributos de la clase los resultados del fine tuning
-        self.search()
+            # deja en los atributos de la clase los resultados del fine tuning
+            self.search()
 
-        # asignamos resultados:
-        self.assign_lr_to_model()
-        self.assign_optimizer_to_model()
+            # asignamos resultados:
+            self.assign_lr_to_model()
+            self.assign_optimizer_to_model()
+        else:
+            self.bayesian_opt_tuner = kt.BayesianOptimization(
+                self.select_optimizer, objective=self.objective, max_trials=self.max_trials_optimizer_tuner,overwrite=self.overwrite,
+                directory=self.directory, project_name='optimizer_and_lr'
+            )
+
+            # deja en los atributos de la clase los resultados del fine tuning
+            self.search()
+
+            # asignamos resultados:
+            self.assign_optimizer_to_model()
 
         self.debugHyperparams()
 
         #####Quinta VUELTA####
         #Hacer vuelta extra de elección de lr más en detalle con el optimizador correcto
-        self.bayesian_opt_tuner = kt.BayesianOptimization(
-            self.select_lr, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
-            directory=self.directory, project_name='lr'
-        )
+        if self.search_lr:
+            self.bayesian_opt_tuner = kt.BayesianOptimization(
+                self.select_lr, objective=self.objective, max_trials=self.max_trials,overwrite=self.overwrite,
+                directory=self.directory, project_name='lr'
+            )
 
-        # deja en los atributos de la clase los resultados del fine tuning
-        self.search()
+            # deja en los atributos de la clase los resultados del fine tuning
+            self.search()
 
-        # asignamos resultados:
-        self.assign_lr_to_model()
-
+            # asignamos resultados:
+            self.assign_lr_to_model()
         self.debugHyperparams()
 
         #####SEXTA VUELTA ####
@@ -365,7 +393,7 @@ class  Model():
 
     def search(self):
         #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
-        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,validation_data=self.validation_data,verbose=self.verbose)
+        self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,batch_size=self.batch_size,validation_data=self.validation_data,verbose=self.verbose)
         self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
     def assign_num_hidden_layers_to_model(self):
@@ -529,6 +557,14 @@ class  Model():
         model = self.create_and_compile_model()
         return model
 
+    def select_optimizer(self,hp):
+        optimizer_choice = hp.Choice("optimizer", self.optimizers_list)
+        # Se traduce el optimizador de string -> funcion de tf.keras
+        self.optimizer = self.available_optimizers[optimizer_choice](learning_rate=self.lr)
+
+        model = self.create_and_compile_model()
+        return model
+
     def select_lr(self,hp):
         lr = hp.Float("lr", min_value=(self.lr / 100), max_value=self.lr, sampling='log')
 
@@ -573,27 +609,10 @@ class  Model():
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[self.optimizers_list[0]](learning_rate=self.lr)
 
-        # if self.use_user_param_values:
-        #     # Si hay muchas features o se van a poner muchas neuronas, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
-        #     if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
-        #         self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
-        #                                              min_value=self.min_num_neurons_per_hidden,
-        #                                              max_value=self.max_num_neurons_per_hidden,
-        #                                              sampling='log')
-        #     else:
-        #         self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden",
-        #                                              min_value=self.min_num_neurons_per_hidden,
-        #                                              max_value=self.max_num_neurons_per_hidden)
-        # else:
-        #     #Se comprueba si el máximo tiene un valor o se dejó a None al inicializar variables de num_neurons_per_hidden
-        #     if self.max_num_neurons_per_hidden is None:
-        #         #Se traduce a que el max es X_train.shape[1]
-        #         self.max_num_neurons_per_hidden = self.X_train.shape[1]
-
         if self.max_num_neurons_per_hidden <= self.min_num_neurons_per_hidden:
             self.num_neurons_per_hidden = self.min_num_neurons_per_hidden
         else:
-            if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden:
+            if self.max_num_neurons_per_hidden > self.threshold_num_neurons_per_hidden_log:
                 self.num_neurons_per_hidden = hp.Int("num_neurons_per_hidden", min_value=self.min_num_neurons_per_hidden,max_value=self.max_num_neurons_per_hidden,sampling='log')  # Si hay muchas features, se hace sample log para que coja valores que representen la gran variación de los posibles valores.
 
             else:
@@ -611,6 +630,17 @@ class  Model():
         self.lr = hp.Float("lr", min_value=self.min_lr, max_value=self.max_lr, sampling='log')
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[self.optimizers_list[0]](learning_rate=self.lr) #No se inicializa en el constructor, ya que nos hace falta primero el valor de lr. Se coge el primer optimizador de la lista
+
+        model = self.create_and_compile_model()
+        return model
+
+    def select_num_hidden_layers(self,hp):
+        self.num_hidden_layers = hp.Int("num_hidden", min_value=self.min_num_hidden_layers,
+                                        max_value=self.max_num_hidden_layers)
+
+        # Se traduce el optimizador de string -> funcion de tf.keras
+        self.optimizer = self.available_optimizers[self.optimizers_list[0]](
+            learning_rate=self.lr)  # No se inicializa en el constructor, ya que nos hace falta primero el valor de lr. Se coge el primer optimizador de la lista
 
         model = self.create_and_compile_model()
         return model
