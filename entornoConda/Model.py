@@ -16,8 +16,8 @@ class  Model():
                  user_max_trials= None, #
                  user_min_num_hidden_layers: int = None,    #
                  user_max_num_hidden_layers: int = None,    #
-                 user_min_num_neurons_per_hidden: int = None,
-                 user_max_num_neurons_per_hidden: int = None,
+                 user_min_num_neurons_per_hidden: int = None,   #
+                 user_max_num_neurons_per_hidden: int = None,   #
                  user_optimizers_list: list = None, #
                  user_hidden_activation_function_list: list = None, #
                  user_lr = None #
@@ -131,7 +131,10 @@ class  Model():
                      print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
              else:
                  #solo se ha recibido min neurons per hidden layers por parametro
-                 self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                 if user_min_num_neurons_per_hidden < self.max_num_neurons_per_hidden:
+                    self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                 else:
+                    print(f"Mínimo de número de neuronas por capa oculta introducido ({user_min_num_neurons_per_hidden}) es mayor que el máximo por defecto ({self.max_num_neurons_per_hidden}). Se cogerán valores por defecto")
         else:
              if user_max_num_neurons_per_hidden is not None:
                  #Solo se ha recibido max neurons per hidden layers por parametro
