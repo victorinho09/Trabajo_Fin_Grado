@@ -4,6 +4,8 @@ import time
 import keras_tuner as kt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+import warnings
+from sklearn.exceptions import ConvergenceWarning
 
 from EpochCumulativeLogger import EpochCumulativeLogger
 from GlobalBatchLogger import GlobalBatchLogger
@@ -105,6 +107,7 @@ class  Model():
 
         self.initialize_tuner_variables(user_max_trials,user_num_epochs)
 
+        warnings.filterwarnings("ignore", category=ConvergenceWarning)
         self.best_hyperparameters = None
         self.metrics = []
         self.model = None
@@ -395,7 +398,6 @@ class  Model():
         self.debugHyperparams()
 
     def search(self):
-        #self.bayesian_opt_tuner.oracle.gpr.kernel.set_params(length_scale_bounds=(1e-10, 1e5))
         self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,batch_size=self.batch_size,validation_data=self.validation_data,verbose=self.verbose)
         self.best_hyperparameters = self.bayesian_opt_tuner.get_best_hyperparameters(num_trials=1)[0].values
 
