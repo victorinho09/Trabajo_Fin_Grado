@@ -13,7 +13,7 @@ print("Mushroom dataset cargado")
 
 # El user si quiere preprocesar dataset le damos la funcion para que lo haga
 X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(data_mushroom,"mushroom")
-model = Model(X_train_scaled, y_train_encoded,"directorio logs")
+model = Model(X_train_scaled, y_train_encoded,"directorio logs",user_max_trials=3)
 model.autotune()
 model.train()
 loss,precision=model.evaluate(X_test_scaled, y_test_encoded)

@@ -2,6 +2,5 @@
 Hacer refactoring de numeros magicos
 Cuando tenga las graficas generadas, mirar si quitar GlobalBatchLog y EpochCumuluta ya que no se usaran las
 callbacks, pero si dejar los ficheros
-quitar warnings de lr
 
 EJ: 10 datasets probados. Entrar en detalle 4.
