@@ -1,0 +1,36 @@
+nombre_dataset = magic_gamma_telescope
+loss = 0.0045627704821527
+precision = 0.9989484548568726
+lr = 0.003817152072318007
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 5
+numero_capas_ocultas = 2
+numero_epocas = 23
+max_trials = 16
+user_num_epochs_tuner = 5
+####################################
+nombre_dataset = magic_gamma_telescope
+loss = 0.011268855072557926
+precision = 0.9952681660652161
+lr = 0.006118123439941162
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 8
+numero_capas_ocultas = 2
+numero_epocas = 15
+max_trials = 16
+user_num_epochs_tuner = 5
+####################################
+nombre_dataset = magic_gamma_telescope
+loss = 0.0059343064203858376
+precision = 0.9971082806587219
+lr = 0.0022356473227546094
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 5
+numero_capas_ocultas = 2
+numero_epocas = 20
+max_trials = 16
+user_num_epochs_tuner = 5
+####################################

@@ -1,0 +1,36 @@
+nombre_dataset = default_payment
+loss = 0.4370358884334564
+precision = 0.8174999952316284
+lr = 0.0010034669616320036
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 16
+numero_capas_ocultas = 6
+numero_epocas = 25
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################
+nombre_dataset = default_payment
+loss = 0.4382150173187256
+precision = 0.8163333535194397
+lr = 0.0023042385084214886
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 8
+numero_capas_ocultas = 3
+numero_epocas = 26
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################
+nombre_dataset = default_payment
+loss = 0.43705639243125916
+precision = 0.8174999952316284
+lr = 0.0020968751743460686
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 14
+numero_capas_ocultas = 3
+numero_epocas = 21
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################

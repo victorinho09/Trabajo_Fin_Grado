@@ -1,6 +1,19 @@
 
-Hacer refactoring de numeros magicos
 Cuando tenga las graficas generadas, mirar si quitar GlobalBatchLog y EpochCumuluta ya que no se usaran las
 callbacks, pero si dejar los ficheros
 
-EJ: 10 datasets probados. Entrar en detalle 4.
+Mirar bien las citas APA 7
+
+Hacer copia del entorno
+
+
+Discusion resultados:
+
+Alguno datasets (dry_bean...) con muy pocos trials funcionan muy mal, pero al entrenarlos con muchas epocas acaban funcionando bien.
+Estudiar datasets por tanto, tambien en funcion del numero de epocas finales entrenadas
+
+Ojo- car_evaluation 1-5. Puede entrenar muy poco porque va bien con el conjunto de entrenamiento y validacion y darse golpe cuando llega al test.
+census_income se ve como generaliza muy mal, ya que cortando entrenamiento, es decir, val_loss va muy bien, la evaluación sale mal.
+
+
+No borrar resultados de graficas_tfg para tener detalles de ejecuciones.

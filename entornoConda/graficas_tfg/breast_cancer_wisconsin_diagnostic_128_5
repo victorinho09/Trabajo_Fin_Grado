@@ -1,0 +1,36 @@
+nombre_dataset = breast_cancer_wisconsin_diagnostic
+loss = 0.032673776149749756
+precision = 0.9912280440330505
+lr = 0.0016499355780711775
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 9
+numero_capas_ocultas = 2
+numero_epocas = 29
+max_trials = 5
+user_num_epochs_tuner = 128
+####################################
+nombre_dataset = breast_cancer_wisconsin_diagnostic
+loss = 0.060293152928352356
+precision = 0.9736841917037964
+lr = 0.0004518197834823164
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 21
+numero_capas_ocultas = 4
+numero_epocas = 16
+max_trials = 5
+user_num_epochs_tuner = 128
+####################################
+nombre_dataset = breast_cancer_wisconsin_diagnostic
+loss = 0.06776117533445358
+precision = 0.9824561476707458
+lr = 3.835037961720009e-05
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 12
+numero_capas_ocultas = 3
+numero_epocas = 154
+max_trials = 5
+user_num_epochs_tuner = 128
+####################################

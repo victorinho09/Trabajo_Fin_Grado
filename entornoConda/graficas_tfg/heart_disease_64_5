@@ -1,0 +1,36 @@
+nombre_dataset = heart_disease
+loss = 0.9244203567504883
+precision = 0.6721311211585999
+lr = 0.006248424368222649
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 8
+numero_capas_ocultas = 4
+numero_epocas = 15
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################
+nombre_dataset = heart_disease
+loss = 0.9583029747009277
+precision = 0.5737704634666443
+lr = 0.0006767295365749264
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 11
+numero_capas_ocultas = 4
+numero_epocas = 84
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################
+nombre_dataset = heart_disease
+loss = 0.9108690619468689
+precision = 0.5901639461517334
+lr = 0.0010536522333003588
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 9
+numero_capas_ocultas = 4
+numero_epocas = 40
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################

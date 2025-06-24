@@ -1,0 +1,36 @@
+nombre_dataset = dry_bean
+loss = 0.2067696899175644
+precision = 0.9221447110176086
+lr = 0.0003567533670835523
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 14
+numero_capas_ocultas = 2
+numero_epocas = 59
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################
+nombre_dataset = dry_bean
+loss = 0.2051945924758911
+precision = 0.922879159450531
+lr = 0.0006089994245015221
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 18
+numero_capas_ocultas = 3
+numero_epocas = 21
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################
+nombre_dataset = dry_bean
+loss = 0.20698818564414978
+precision = 0.922879159450531
+lr = 0.00015813927482006193
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 17
+numero_capas_ocultas = 2
+numero_epocas = 113
+max_trials = 5
+user_num_epochs_tuner = 64
+####################################

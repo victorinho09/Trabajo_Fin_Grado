@@ -1,0 +1,36 @@
+nombre_dataset = census_income
+loss = 0.933395504951477
+precision = 0.5721158981323242
+lr = 0.0007953088321613641
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 43
+numero_capas_ocultas = 5
+numero_epocas = 16
+max_trials = 5
+user_num_epochs_tuner = 4
+####################################
+nombre_dataset = census_income
+loss = 0.9210107922554016
+precision = 0.5831712484359741
+lr = 0.00013865035687517555
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 13
+numero_capas_ocultas = 5
+numero_epocas = 29
+max_trials = 5
+user_num_epochs_tuner = 4
+####################################
+nombre_dataset = census_income
+loss = 0.9272609353065491
+precision = 0.5818405151367188
+lr = 0.0005405468684390098
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 51
+numero_capas_ocultas = 5
+numero_epocas = 13
+max_trials = 5
+user_num_epochs_tuner = 4
+####################################

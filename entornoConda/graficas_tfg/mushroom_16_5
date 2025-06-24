@@ -1,0 +1,36 @@
+nombre_dataset = mushroom
+loss = 3.6225555959390476e-06
+precision = 1.0
+lr = 0.0005101122544234531
+optimizador = rmsprop
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 58
+numero_capas_ocultas = 4
+numero_epocas = 13
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################
+nombre_dataset = mushroom
+loss = 1.1310248737572692e-06
+precision = 1.0
+lr = 0.002516817598377097
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 53
+numero_capas_ocultas = 3
+numero_epocas = 11
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################
+nombre_dataset = mushroom
+loss = 0.693672776222229
+precision = 0.4818461537361145
+lr = 0.04049044926907544
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 61
+numero_capas_ocultas = 5
+numero_epocas = 31
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################

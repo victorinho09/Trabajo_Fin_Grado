@@ -1,0 +1,36 @@
+nombre_dataset = spambase
+loss = 0.201072558760643
+precision = 0.929424524307251
+lr = 0.0014097948436939036
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 36
+numero_capas_ocultas = 6
+numero_epocas = 16
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################
+nombre_dataset = spambase
+loss = 0.19527359306812286
+precision = 0.9250814318656921
+lr = 0.00028259782443485057
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 40
+numero_capas_ocultas = 4
+numero_epocas = 15
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################
+nombre_dataset = spambase
+loss = 0.21341197192668915
+precision = 0.9239956736564636
+lr = 0.0005872769059882961
+optimizador = rmsprop
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 31
+numero_capas_ocultas = 5
+numero_epocas = 16
+max_trials = 5
+user_num_epochs_tuner = 8
+####################################

@@ -1,0 +1,36 @@
+nombre_dataset = bank_marketing
+loss = 0.2182721197605133
+precision = 0.9055623412132263
+lr = 0.0008643483269671578
+optimizador = adam
+funcion_activacion = relu
+numero_neuronas_por_capa_oculta = 23
+numero_capas_ocultas = 2
+numero_epocas = 25
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################
+nombre_dataset = bank_marketing
+loss = 0.21763436496257782
+precision = 0.9025765657424927
+lr = 0.0004960533547578027
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 12
+numero_capas_ocultas = 6
+numero_epocas = 40
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################
+nombre_dataset = bank_marketing
+loss = 0.21994426846504211
+precision = 0.904235303401947
+lr = 0.00024058862558673473
+optimizador = adam
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 21
+numero_capas_ocultas = 4
+numero_epocas = 63
+max_trials = 5
+user_num_epochs_tuner = 16
+####################################

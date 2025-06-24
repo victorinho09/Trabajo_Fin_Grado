@@ -145,7 +145,6 @@ class  Model():
                      self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
                  else:
                      print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
-             print(f"Valor de max_num_neurons: {self.max_num_neurons_per_hidden}. Debe devolver none")
 
     def initialize_optimizer_variables(self,user_optimizers_list = None):
 

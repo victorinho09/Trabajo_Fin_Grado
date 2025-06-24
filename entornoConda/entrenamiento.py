@@ -2,8 +2,8 @@ from Model import Model
 from preprocesamiento import preprocess_dataset
 
 
-def train_and_evaluate(dataset,nombre_fichero_info_dataset, num_batches=None, log_dir = "logs/fit/default_dataset_name", batch_size= 16,user_num_epochs= None, user_max_trials=None):
-    X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(dataset,nombre_fichero_info_dataset)
+def train_and_evaluate(dataset,nombre_fichero_info_dataset,nombre_clase_objetivo, num_batches=None, log_dir = "logs/fit/default_dataset_name", batch_size= 16,user_num_epochs= None, user_max_trials=None):
+    X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(dataset,nombre_fichero_info_dataset,nombre_clase_objetivo=nombre_clase_objetivo)
 
     model = Model(X_train_scaled, y_train_encoded,log_dir,batch_size,num_batches,user_num_epochs=user_num_epochs,user_max_trials=user_max_trials)
     model.autotune()
@@ -22,5 +22,5 @@ def train_and_evaluate(dataset,nombre_fichero_info_dataset, num_batches=None, lo
         "numero_capas_ocultas" : hiperparams_and_params[4],
         "numero_epocas" : hiperparams_and_params[5],
         "max_trials" : hiperparams_and_params[6],
-
+        "user_num_epochs_tuner" : user_num_epochs
     }

@@ -1,0 +1,36 @@
+nombre_dataset = car_evaluation
+loss = 1.3870296478271484
+precision = 0.21387283504009247
+lr = 2.706750385950754e-08
+optimizador = sgd
+funcion_activacion = silu
+numero_neuronas_por_capa_oculta = 17
+numero_capas_ocultas = 3
+numero_epocas = 11
+max_trials = 5
+user_num_epochs_tuner = 1
+####################################
+nombre_dataset = car_evaluation
+loss = 0.09795427322387695
+precision = 0.9653179049491882
+lr = 0.003861133609854523
+optimizador = rmsprop
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 14
+numero_capas_ocultas = 6
+numero_epocas = 19
+max_trials = 5
+user_num_epochs_tuner = 1
+####################################
+nombre_dataset = car_evaluation
+loss = 0.035182707011699677
+precision = 0.9826589822769165
+lr = 0.007012729399975945
+optimizador = adam
+funcion_activacion = elu
+numero_neuronas_por_capa_oculta = 17
+numero_capas_ocultas = 3
+numero_epocas = 43
+max_trials = 5
+user_num_epochs_tuner = 1
+####################################
