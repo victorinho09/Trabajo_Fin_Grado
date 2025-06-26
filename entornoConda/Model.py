@@ -1,5 +1,4 @@
 import math
-import time
 
 import keras_tuner as kt
 import tensorflow as tf
@@ -7,12 +6,11 @@ from sklearn.model_selection import train_test_split
 import warnings
 from sklearn.exceptions import ConvergenceWarning
 
-from EpochCumulativeLogger import EpochCumulativeLogger
-from GlobalBatchLogger import GlobalBatchLogger
-from funciones_auxiliares import get_num_batches_per_epoch
+from preprocesamiento import preprocess_dataset
+
 
 class  Model():
-    def __init__(self,X_train,y_train,log_dir,X_val=None,y_val=None,
+    def __init__(self,dataset,clase_objetivo,nombre_fichero_info_dataset,log_dir,X_val=None,y_val=None,
                  user_batch_size=None, #
                  user_num_epochs=None, #
                  user_max_trials= None, #
@@ -25,18 +23,18 @@ class  Model():
                  user_lr = None #
                  ):
 
+        self.X_train, self.X_test, self.y_train, self.y_test = preprocess_dataset(dataset, nombre_fichero_info_dataset,clase_objetivo)
+
         self.validation_split = 0.3  # Se usa validation split para que automáticamente divida el train set. Con validation data hay que separarlo manualmente.
         self.shuffle = True  # Para que baraje los datos antes de la división del val set
         # Se cogen los datos de validación por paramétro si existen, si no se crean del train set
         if (X_val is None) or (y_val is None):
             # hacer split del train
-            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(X_train, y_train,
+            self.X_train, self.X_val, self.y_train, self.y_val = train_test_split(self.X_train, self.y_train,
                                                                                   test_size=self.validation_split)  # Se genera el conjunto de validacion y se ponen como argumentos todos los datasets necesarios
         else:
             self.X_val = X_val
             self.y_val = y_val
-            self.X_train = X_train
-            self.y_train = y_train
         self.validation_data = (self.X_val, self.y_val)
 
         # global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
@@ -739,11 +737,11 @@ class  Model():
     #    metric_loss_per_batch = dividir_array(global_batch_logger.batch_loss_acum, self.num_batches_per_epoch)
     #    metric_accuracy_per_batch = dividir_array(global_batch_logger.batch_accuracy_acum, self.num_batches_per_epoch)
 
-    def evaluate(self,X_test, y_test):
+    def evaluate(self):
         #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
         print("Se hace la evaluacion:")
         #Por pantalla se imprime la loss del ultimo batch ejecutado por evaluate. Pero la funcion devuelve la perdida media de todos los batches
-        return self.model.evaluate(X_test, y_test,batch_size=self.batch_size)
+        return self.model.evaluate(self.X_test, self.y_test,batch_size=self.batch_size)
 
     def get_final_hyperparams_and_params(self):
         return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs_trained,self.max_trials]

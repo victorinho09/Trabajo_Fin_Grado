@@ -1,26 +1,34 @@
+from pathlib import Path
+
+import kagglehub
+import pandas as pd
 from ucimlrepo import fetch_ucirepo
 from Model import Model
-from entrenamiento import train_and_evaluate
-from preprocesamiento import preprocess_dataset
+
 
 #data_iris = fetch_ucirepo(id=53).data #clasificacion
 #print("Iris dataset cargado")
 #train_and_evaluate(data_iris,"iris",user_num_epochs=30)
 
-data_mushroom = fetch_ucirepo(id=73).data #clasificacion
-print("Mushroom dataset cargado")
+# data_mushroom = fetch_ucirepo(id=73).data #clasificacion
+# print("Mushroom dataset cargado")
 #train_and_evaluate(data_mushroom,500, "logs/fit/mushroom/500batches",16,"mushroom")
 
+ruta_fichero_kaggle = "uciml/mushroom-classification"
+ruta_fichero_csv_interno = "mushrooms.csv"
+nombre_fichero_dataset = "mushroom"
+nombre_clase_objetivo = "class"
+
+dataset_dir = kagglehub.dataset_download(ruta_fichero_kaggle)
+dataset_path = Path(dataset_dir)
+data = pd.read_csv(dataset_path / ruta_fichero_csv_interno)
+
 # El user si quiere preprocesar dataset le damos la funcion para que lo haga
-X_train_scaled, X_test_scaled, y_train_encoded, y_test_encoded = preprocess_dataset(data_mushroom,"mushroom")
-model = Model(X_train_scaled, y_train_encoded,"directorio logs",user_max_trials=3)
+model = Model(data,"class","mushroom","directorio logs",user_max_trials=3)
 model.autotune()
 model.train()
-loss,precision=model.evaluate(X_test_scaled, y_test_encoded)
+loss,precision=model.evaluate()
 hiperparams_and_params = model.get_final_hyperparams_and_params()
-# El user deberá pasar el dataset a la inicializacion del modelo
-
-
 
 # data_heart_disease = fetch_ucirepo(id=45).data #clasificacion
 # print("Heart_disease dataset cargado")
