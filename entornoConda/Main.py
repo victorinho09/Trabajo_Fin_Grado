@@ -13,7 +13,7 @@ dataset_dir = kagglehub.dataset_download(ruta_fichero_kaggle)
 dataset_path = Path(dataset_dir)
 data = pd.read_csv(dataset_path / ruta_fichero_csv_interno)
 
-model_search = Model(data,"class","mushroom","directorio_logs")
+model_search = Model(data,"class","mushroom")
 model_search.autotune()
 model_search.train()
 loss,precision=model_search.evaluate()

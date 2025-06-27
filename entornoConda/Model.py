@@ -10,7 +10,7 @@ from preprocesamiento import preprocess_dataset
 
 
 class  Model():
-    def __init__(self,dataset,clase_objetivo,nombre_fichero_info_dataset,log_dir,X_val=None,y_val=None,
+    def __init__(self,dataset,clase_objetivo,nombre_fichero_info_dataset="info_dataset",X_val=None,y_val=None,
                  user_batch_size=None, #
                  user_num_epochs=None, #
                  user_max_trials= None, #
@@ -47,7 +47,6 @@ class  Model():
         else:
             self.batch_size = 16
         self.verbose = 1
-        self.log_dir = log_dir
 
         #Se hace solo para el entrenamiento final del modelo
         early_stop = tf.keras.callbacks.EarlyStopping(
