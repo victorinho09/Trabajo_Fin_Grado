@@ -2,6 +2,5 @@
 Cuando tenga las graficas generadas, mirar si quitar GlobalBatchLog y EpochCumuluta ya que no se usaran las
 callbacks, pero si dejar los ficheros
 
-modificar para cambiar que siempre preprocese dataset haga lo que haga (codigo y memoria (GRAFICAS,FLUJOS...))
 
 No borrar resultados de graficas_tfg para tener detalles de ejecuciones.

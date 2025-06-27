@@ -743,8 +743,8 @@ class  Model():
         #Por pantalla se imprime la loss del ultimo batch ejecutado por evaluate. Pero la funcion devuelve la perdida media de todos los batches
         return self.model.evaluate(self.X_test, self.y_test,batch_size=self.batch_size)
 
-    def get_final_hyperparams_and_params(self):
-        return [self.lr,self.optimizer_name,self.hidden_activation_function.__name__,self.num_neurons_per_hidden,self.num_hidden_layers,self.num_epochs_trained,self.max_trials]
+    def get_final_model(self):
+        return self.model
 
     def debugHyperparams(self):
         print(f"#########DEBUG##########")

@@ -1,4 +1,4 @@
-nombre_dataset = breast_cancer_wisconsin_diagnostic
+    nombre_dataset = breast_cancer_wisconsin_diagnostic
 loss = 0.024263115599751472
 precision = 0.9912280440330505
 lr = 0.013380426833168646
