@@ -14,6 +14,7 @@ Una librería de AutoML basada en Keras diseñada para generar automáticamente 
 	•	Validación interna: validation_split configurable o partición manual usando conjuntos de validación.
 	•	Configuración flexible: Permite rangos personalizados de búsqueda de hiperparámetros.
 
+
 💡 Usage
 
 ### Importa la librería
