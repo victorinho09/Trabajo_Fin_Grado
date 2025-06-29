@@ -1,21 +1,8 @@
 import os
-
 import numpy as np
-import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
-from funciones_auxiliares import get_y_target_col
-
-# X = pd.DataFrame(data.features, columns=data.feature_names)
-#         y = get_y_target_col(data)
-#
-#         # Unir horizontalmente, suponiendo que están en el mismo orden de filas
-#         df_unido = pd.concat([X, y], axis=1)
-#
-#         # Ver resultado
-#         print(df_unido.head())
 
 def procesamiento_columnas_dataset(ruta_fichero,y_train,y_test,X_train,X_test):
     with open(ruta_fichero, "a") as f:

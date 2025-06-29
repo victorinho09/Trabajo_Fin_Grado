@@ -1,26 +1,24 @@
 import math
-
 import keras_tuner as kt
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 import warnings
 from sklearn.exceptions import ConvergenceWarning
-
 from preprocesamiento import preprocess_dataset
 
 
-class  Model():
+class  AutoMLClassifier():
     def __init__(self,dataset,clase_objetivo,nombre_fichero_info_dataset="info_dataset",X_val=None,y_val=None,
-                 user_batch_size=None, #
-                 user_num_epochs=None, #
-                 user_max_trials= None, #
+                 user_batch_size: int = None, #
+                 user_num_epochs: int =None, #
+                 user_max_trials: int = None, #
                  user_min_num_hidden_layers: int = None,    #
                  user_max_num_hidden_layers: int = None,    #
                  user_min_num_neurons_per_hidden: int = None,   #
                  user_max_num_neurons_per_hidden: int = None,   #
                  user_optimizers_list: list = None, #
                  user_hidden_activation_function_list: list = None, #
-                 user_lr = None #
+                 user_lr: float = None #
                  ):
 
         self.X_train, self.X_test, self.y_train, self.y_test = preprocess_dataset(dataset, nombre_fichero_info_dataset,clase_objetivo)
@@ -37,13 +35,17 @@ class  Model():
             self.y_val = y_val
         self.validation_data = (self.X_val, self.y_val)
 
-        # global_batch_logger = GlobalBatchLogger(log_dir + "/batch/" + time.strftime("%Y%m%d-%H%M%S"))
-        # global_epoch_logger = EpochCumulativeLogger(log_dir + "/epoch/" + time.strftime("%Y%m%d-%H%M%S"))
-        # tb_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir + "/tensorboard/" + time.strftime("%Y%m%d-%H%M%S"), histogram_freq=1, update_freq='epoch')
-
         # atributos de parametros pasados al fit method de funcion train
         if user_batch_size is not None:
-            self.batch_size = user_batch_size
+            if isinstance(user_batch_size, int):
+                if user_batch_size > 0:
+                    self.batch_size = user_batch_size
+                else:
+                    print("El valor de batch size introducido es incorrecto. Se cogerá el valor por defecto.")
+                    self.batch_size = 16
+            else:
+                print("El tipo de dato introducido para el batch size es incorrecto. Se cogerá el valor por defecto.")
+                self.batch_size = 16
         else:
             self.batch_size = 16
         self.verbose = 1
@@ -57,28 +59,32 @@ class  Model():
             restore_best_weights=True,
             min_delta=1e-4
         )
-        #tb_callback, global_epoch_logger, global_batch_logger,
         self.callbacks = [early_stop]
-
 
         self.num_clases_target = self.y_train.shape[1]
         #Se entrena siempre 1000 epocas ya que se aplica early stopping
         self.num_epochs_final_training = 1000
-
-        # self.num_batches = user_num_batches
 
         if self.num_clases_target == 2:
             self.loss = "binary_crossentropy"
         else:
             self.loss = 'categorical_crossentropy' # uso categorical_crossentropy cuando las etiquetas están codificadas con one-hot encoder. Si no usaría: sparse_categ_cross
 
-        ################HASTA AQUI HIPERPARAMETROS DE ENTRENAMIENTO
-
         self.history = None #No obtendrá valor hasta que se entrene el modelo
 
         if user_lr is not None:
-            self.lr = user_lr
-            self.search_lr = False
+            if isinstance(user_lr, float):
+                if 0 < user_lr <= 1:
+                    self.lr = user_lr
+                    self.search_lr = False
+                else:
+                    print("El valor de tasa de aprendizaje introducido es incorrecto. Se cogerán valores por defecto.")
+                    self.lr = 1e-5
+                    self.search_lr = True
+            else:
+                print("El tipo de dato introducido para la tasa de aprendizaje es incorrecto. Se cogerán valores por defecto.")
+                self.lr = 1e-5
+                self.search_lr = True
         else:
             self.lr = 1e-5
             self.search_lr = True
@@ -118,30 +124,38 @@ class  Model():
         self.use_user_param_values = False
         self.max_num_neurons_per_hidden = math.ceil((2/3) * self.X_train.shape[1] + self.y_train.shape[1])
 
-        if user_min_num_neurons_per_hidden is not None:
-             if user_max_num_neurons_per_hidden is not None:
-                 #Se ha recibido min y max neurons per hidden layers por parametro
-                 if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
-                     self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-                     self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-                 elif user_min_num_neurons_per_hidden == user_max_num_neurons_per_hidden:
-                     self.num_neurons_per_hidden = user_max_num_neurons_per_hidden
-                     self.search_num_neurons_per_hidden = False
-                 else:
-                     print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
-             else:
-                 #solo se ha recibido min neurons per hidden layers por parametro
-                 if user_min_num_neurons_per_hidden < self.max_num_neurons_per_hidden:
-                    self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
-                 else:
-                    print(f"Mínimo de número de neuronas por capa oculta introducido ({user_min_num_neurons_per_hidden}) es mayor que el máximo por defecto ({self.max_num_neurons_per_hidden}). Se cogerán valores por defecto")
+        #Comprobación de tipos
+        if (not isinstance(user_min_num_neurons_per_hidden,int) and user_min_num_neurons_per_hidden is not None) or (not isinstance(user_max_num_neurons_per_hidden,int) and user_max_num_neurons_per_hidden is not None):
+            print("Se ha introducido un tipo de dato incorrecto para el rango de búsqueda del número de neuronas por capa oculta. Se cogerán valores por defecto")
         else:
-             if user_max_num_neurons_per_hidden is not None:
-                 #Solo se ha recibido max neurons per hidden layers por parametro
-                 if user_max_num_neurons_per_hidden > self.min_num_neurons_per_hidden:
-                     self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
-                 else:
-                     print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
+            #Comprobación de rango de valores
+            if (user_min_num_neurons_per_hidden is not None and user_min_num_neurons_per_hidden <= 0) or (user_max_num_neurons_per_hidden is not None and user_max_num_neurons_per_hidden <= 0):
+                print("Se ha introducido un valor incorrecto para el rango de búsqueda del número de neuronas por capa oculta. Se cogerán valores por defecto")
+            else:
+                if user_min_num_neurons_per_hidden is not None:
+                     if user_max_num_neurons_per_hidden is not None:
+                         #Se ha recibido min y max neurons per hidden layers por parametro
+                         if user_min_num_neurons_per_hidden < user_max_num_neurons_per_hidden:
+                             self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                         elif user_min_num_neurons_per_hidden == user_max_num_neurons_per_hidden:
+                             self.num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                             self.search_num_neurons_per_hidden = False
+                         else:
+                             print(f"El máximo introducido ({user_max_num_neurons_per_hidden}) es menor que el mínimo introducido ({user_min_num_neurons_per_hidden}).Se cogerán valores por defecto.")
+                     else:
+                         #solo se ha recibido min neurons per hidden layers por parametro
+                         if user_min_num_neurons_per_hidden < self.max_num_neurons_per_hidden:
+                            self.min_num_neurons_per_hidden = user_min_num_neurons_per_hidden
+                         else:
+                            print(f"Mínimo de número de neuronas por capa oculta introducido ({user_min_num_neurons_per_hidden}) es mayor que el máximo por defecto ({self.max_num_neurons_per_hidden}). Se cogerán valores por defecto")
+                else:
+                     if user_max_num_neurons_per_hidden is not None:
+                         #Solo se ha recibido max neurons per hidden layers por parametro
+                         if user_max_num_neurons_per_hidden > self.min_num_neurons_per_hidden:
+                             self.max_num_neurons_per_hidden = user_max_num_neurons_per_hidden
+                         else:
+                             print(f"El mínimo por defecto ({self.min_num_neurons_per_hidden}) > {user_max_num_neurons_per_hidden}. Se cogerán valores por defecto")
 
     def initialize_optimizer_variables(self,user_optimizers_list = None):
 
@@ -159,12 +173,28 @@ class  Model():
             "ftrl": tf.keras.optimizers.Ftrl,
             "lion": tf.keras.optimizers.Lion,
         }
+        error_list_optimizers = False
+        default_optimizers_list = ['adam','sgd','rmsprop']
 
         if user_optimizers_list:
-            optimizers_list_lowercase = [s.lower() for s in user_optimizers_list]
-            self.optimizers_list =  optimizers_list_lowercase
+            for optimizer in user_optimizers_list:
+                if not isinstance(optimizer,str):
+                    print(f"Se ha introducido un tipo de dato incorrecto en la lista de optimizadores. Optimizador: {optimizer}. Se cogerán los valores por defecto.")
+                    error_list_optimizers = True
+                    break
+            if not error_list_optimizers:
+                optimizers_list_lowercase = [s.lower() for s in user_optimizers_list]
+                for optimizer in optimizers_list_lowercase:
+                    if optimizer not in self.available_optimizers:
+                        print(f"Se ha introducido un nombre de optimizador incorrecto: {optimizer}. Se cogerán los valores por defecto.")
+                        self.optimizers_list = default_optimizers_list
+                        break
+                    else:
+                        self.optimizers_list = optimizers_list_lowercase
+            else:
+                self.optimizers_list = default_optimizers_list
         else:
-            self.optimizers_list = ['adam','sgd','rmsprop']
+            self.optimizers_list = default_optimizers_list
 
         self.optimizer = None #NO se hace en constructor porque falta lr
         self.optimizer_name = self.optimizers_list[0] #Porque de momento se coge el primero para hacer pruebas
@@ -204,31 +234,62 @@ class  Model():
             "silu": tf.keras.activations.swish,
             "swish": tf.keras.activations.swish,
         }
+        error_list_hidden_functions = False
+        default_hidden_functions_list = ['relu','elu', 'silu']
 
         # Se comprueba si el parametro opcional viene dado o no
         if user_hidden_activation_function_list:
-            # Se pasan a minúsculas todas las strings de la lista
-            hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
-            self.hidden_activation_function_list = hidden_activation_function_list_lowercase
+            for hidden_function in user_hidden_activation_function_list:
+                if not isinstance(hidden_function,str):
+                    print(f"Se ha introducido un tipo de dato incorrecto en la lista de funciones de activación. Función de activación: {hidden_function}. Se cogerán valores por defecto.")
+                    error_list_hidden_functions = True
+                    break
+            if not error_list_hidden_functions:
+                # Se pasan a minúsculas todas las strings de la lista
+                hidden_activation_function_list_lowercase = [s.lower() for s in user_hidden_activation_function_list]
+                #Se comprueba que todos los nombre introducidos son correctos
+                for activation_function in hidden_activation_function_list_lowercase:
+                    if activation_function not in self.available_hidden_activation_functions:
+                        print(f"Se ha introducido un nombre de función de activación incorrecto: {activation_function}. Se cogerán los valores por defecto.")
+                        self.hidden_activation_function_list = default_hidden_functions_list
+                        break
+                    else:
+                        self.hidden_activation_function_list = hidden_activation_function_list_lowercase
+            else:
+                self.hidden_activation_function_list = default_hidden_functions_list
         else:
-            self.hidden_activation_function_list = ['relu','elu', 'silu']
+            self.hidden_activation_function_list = default_hidden_functions_list
         self.hidden_activation_function = self.available_hidden_activation_functions[self.hidden_activation_function_list[0]]
 
     def initialize_tuner_variables(self,user_max_trials=None,user_num_epochs=None):
-
+        self.default_max_trials = 5
+        self.default_num_epochs = 5
         if user_num_epochs is not None:
-            self.num_epochs_tuner = user_num_epochs
-            #self.num_batches_per_epoch = get_num_batches_per_epoch(validation_split_value=self.validation_split,filas=self.X_train.shape[0],batch_size=self.batch_size)
+            if isinstance(user_num_epochs, int):
+                if user_num_epochs > 0:
+                    self.num_epochs_tuner = user_num_epochs
+                else:
+                    print("El valor introducido de número de épocas de entrenamiento por cada trial es incorrecto. Se cogerá el valor por defecto.")
+                    self.num_epochs_tuner = self.default_num_epochs
+            else:
+                print("El tipo de dato introducido para el número de épocas de entrenamiento por cada trial es incorrecto. Se cogerá el valor por defecto.")
+                self.num_epochs_tuner = self.default_num_epochs
         else:
-            self.num_epochs_tuner = 10
-            # self.num_epochs, self.num_batches_per_epoch = get_num_epochs_train(self.batch_size, self.X_train, self.num_batches,self.validation_split)
-
+            self.num_epochs_tuner = self.default_num_epochs
 
         # atributos de parametros pasados al tuner
         if user_max_trials is not None:
-            self.max_trials = user_max_trials
+            if isinstance(user_max_trials, int):
+                if user_max_trials > 0:
+                    self.max_trials = user_max_trials
+                else:
+                    print("El valor introducido de número de trials por etapa de búsqueda es incorrecto. Se cogerán valores por defecto.")
+                    self.max_trials = self.default_max_trials
+            else:
+                print("El tipo de dato introducido para el número de trials por etapa de búsqueda es incorrecto. Se cogerán valores por defecto.")
+                self.max_trials = self.default_max_trials
         else:
-            self.max_trials = 15
+            self.max_trials = self.default_max_trials
 
         self.bayesian_opt_tuner = None
 
@@ -236,8 +297,8 @@ class  Model():
         self.max_trials_activation_function_tuner = len(self.hidden_activation_function_list)
 
         ##El número mínimo de max_trials para buscar el optimizador debe ser la longitud de la lista de optimizadores. Pero el máximo podrá ser cualquiera
-        if (user_max_trials is not None) and (user_max_trials >= len(self.optimizers_list)):
-            self.max_trials_optimizer_tuner = user_max_trials
+        if self.max_trials >= len(self.optimizers_list):
+            self.max_trials_optimizer_tuner = self.max_trials
         else:
             self.max_trials_optimizer_tuner = len(self.optimizers_list)
 
@@ -250,31 +311,39 @@ class  Model():
         self.max_num_hidden_layers = 6  #Habia demasiadas capas si se ponia la raiz del numero de features
         self.search_num_hidden_layers = True
 
-        if user_min_num_hidden_layers is not None:
-            if user_max_num_hidden_layers is not None:
-                #Se ha recibido min y max hidden layers por parametro
-                if user_min_num_hidden_layers < user_max_num_hidden_layers:
-                    self.min_num_hidden_layers = user_min_num_hidden_layers
-                    self.max_num_hidden_layers = user_max_num_hidden_layers
-                elif user_min_num_hidden_layers == user_max_num_hidden_layers:
-                    self.num_hidden_layers = user_max_num_hidden_layers
-                    self.search_num_hidden_layers = False
-                else:
-                    print(f"El valor máximo introducido({user_max_num_hidden_layers}) es menor que el mínimo introducido({user_min_num_hidden_layers}). Se cogerán valores por defecto.")
-
-            else:
-                #solo se ha recibido min hidden layers por parametro
-                if user_min_num_hidden_layers < self.max_num_hidden_layers:
-                    self.min_num_hidden_layers = user_min_num_hidden_layers
-                else:
-                    print(f"Mínimo de capas ocultas introducido ({user_min_num_hidden_layers}) es mayor que el máximo de capas por defecto ({self.max_num_hidden_layers}). Se cogerán valores por defecto")
+        # Comprobación de tipos
+        if (not isinstance(user_min_num_hidden_layers, int) and user_min_num_hidden_layers is not None) or (not isinstance(user_max_num_hidden_layers, int) and user_max_num_hidden_layers is not None):
+            print("Se ha introducido un tipo de dato incorrecto para el rango de búsqueda del número de capas ocultas. Se cogerán valores por defecto")
         else:
-            if user_max_num_hidden_layers is not None:
-                #Solo se ha recibido max hidden layers por parametro
-                if user_max_num_hidden_layers > self.min_num_hidden_layers:
-                    self.max_num_hidden_layers = user_max_num_hidden_layers
+            # Comprobación de rango de valores
+            if (user_min_num_hidden_layers is not None and user_min_num_hidden_layers <= 0) or (user_max_num_hidden_layers is not None and user_max_num_hidden_layers <= 0):
+                print("Se ha introducido un valor negativo para el rango de búsqueda del número de capas ocultas. Se cogerán valores por defecto")
+            else:
+                if user_min_num_hidden_layers is not None:
+                    if user_max_num_hidden_layers is not None:
+                        #Se ha recibido min y max hidden layers por parametro
+                        if user_min_num_hidden_layers < user_max_num_hidden_layers:
+                            self.min_num_hidden_layers = user_min_num_hidden_layers
+                            self.max_num_hidden_layers = user_max_num_hidden_layers
+                        elif user_min_num_hidden_layers == user_max_num_hidden_layers:
+                            self.num_hidden_layers = user_max_num_hidden_layers
+                            self.search_num_hidden_layers = False
+                        else:
+                            print(f"El valor máximo introducido({user_max_num_hidden_layers}) es menor que el mínimo introducido({user_min_num_hidden_layers}). Se cogerán valores por defecto.")
+
+                    else:
+                        #solo se ha recibido min hidden layers por parametro
+                        if user_min_num_hidden_layers < self.max_num_hidden_layers:
+                            self.min_num_hidden_layers = user_min_num_hidden_layers
+                        else:
+                            print(f"Mínimo de capas ocultas introducido ({user_min_num_hidden_layers}) es mayor que el máximo de capas por defecto ({self.max_num_hidden_layers}). Se cogerán valores por defecto")
                 else:
-                    print(f"Máximo de capas ocultas introducido ({user_max_num_hidden_layers}) es menor o igual que el mínimo por defecto ({self.min_num_hidden_layers}). Se cogerán valores por defecto")
+                    if user_max_num_hidden_layers is not None:
+                        #Solo se ha recibido max hidden layers por parametro
+                        if user_max_num_hidden_layers > self.min_num_hidden_layers:
+                            self.max_num_hidden_layers = user_max_num_hidden_layers
+                        else:
+                            print(f"Máximo de capas ocultas introducido ({user_max_num_hidden_layers}) es menor o igual que el mínimo por defecto ({self.min_num_hidden_layers}). Se cogerán valores por defecto")
 
     def autotune(self):
 
@@ -304,7 +373,6 @@ class  Model():
                 self.assign_num_hidden_layers_to_model()
         else:
             print(f"\nSaltando búsqueda de num_hidden_layers. El usuario ya ha fijado el valor por defecto: {self.num_hidden_layers}\n")
-        self.debugHyperparams()
 
         ####SEGUNDA VUELTA###
         #Se deciden numero de neuronas por capa
@@ -327,8 +395,6 @@ class  Model():
         else:
             print(f"\nSaltando búsqueda de num_neurons_per_hidden. El usuario ya ha fijado el valor por defecto: {self.num_neurons_per_hidden}\n")
 
-        self.debugHyperparams()
-
         ####TERCERA VUELTA
         # Se decide funcion de activacion de las capas ocultas
         self.bayesian_opt_tuner = kt.GridSearch(
@@ -341,8 +407,6 @@ class  Model():
 
         # asignamos resultados de la tercera vuelta:
         self.assign_hidden_activation_function_to_model()
-
-        self.debugHyperparams()
 
         ####Cuarta VUELTA####
         if self.search_lr:
@@ -369,8 +433,6 @@ class  Model():
             # asignamos resultados:
             self.assign_optimizer_to_model()
 
-        self.debugHyperparams()
-
         #####Quinta VUELTA####
         #Hacer vuelta extra de elección de lr más en detalle con el optimizador correcto
         if self.search_lr:
@@ -384,7 +446,9 @@ class  Model():
 
             # asignamos resultados:
             self.assign_lr_to_model()
-        self.debugHyperparams()
+        else:
+            print(f"\nSaltando búsqueda de tasa de aprendizaje. El usuario ya ha fijado el valor por defecto: {self.lr}\n")
+
 
         #####SEXTA VUELTA ####
         self.bayesian_opt_tuner = kt.BayesianOptimization(
@@ -398,11 +462,8 @@ class  Model():
         # asignamos resultados:
         self.assign_optimizer_with_params_to_model()
 
-        self.debugHyperparams()
-
         #al fin, se construye el modelo final
         self.model = self.create_and_compile_model()
-        self.debugHyperparams()
 
     def search(self):
         self.bayesian_opt_tuner.search(self.X_train, self.y_train, epochs=self.num_epochs_tuner,batch_size=self.batch_size,validation_data=self.validation_data,verbose=self.verbose)
@@ -616,7 +677,7 @@ class  Model():
         model = self.create_and_compile_model()
         return model
 
-    #se deciden numero num_neuronas_por_capa y lr otra vez
+    #se deciden numero num_neuronas_por_capa y lr
     def select_num_neurons_per_hidden(self,hp):
         # Se traduce el optimizador de string -> funcion de tf.keras
         self.optimizer = self.available_optimizers[self.optimizers_list[0]](learning_rate=self.lr)
@@ -725,30 +786,28 @@ class  Model():
             callbacks=self.callbacks
         )
         self.num_epochs_trained = len(self.history.history['loss'])
-        #Obtenemos las metricas
-        # self.set_metrics(self.callbacks[2])
-
-
-    #def set_metrics(self,global_batch_logger):
-
-    #    metric_val_accuracy = self.history.history["val_accuracy"]
-    #    metric_val_loss = self.history.history["val_loss"]
-    #    metric_loss_per_batch = dividir_array(global_batch_logger.batch_loss_acum, self.num_batches_per_epoch)
-    #    metric_accuracy_per_batch = dividir_array(global_batch_logger.batch_accuracy_acum, self.num_batches_per_epoch)
+        self.debugHyperparams_after_train()
 
     def evaluate(self):
-        #Devuelve una lista, elemento 0 -> loss, elemento 1 -> accuracy
+        #Devuelve una lista: elemento 0 -> loss, elemento 1 -> accuracy
         print("Se hace la evaluacion:")
         #Por pantalla se imprime la loss del ultimo batch ejecutado por evaluate. Pero la funcion devuelve la perdida media de todos los batches
-        return self.model.evaluate(self.X_test, self.y_test,batch_size=self.batch_size)
+        self.loss, self.accuracy = self.model.evaluate(self.X_test, self.y_test,batch_size=self.batch_size)
+        self.debugHyperparams_after_evaluate()
+        return self.loss, self.accuracy
 
     def get_final_model(self):
         return self.model
 
-    def debugHyperparams(self):
-        print(f"#########DEBUG##########")
-        print(f"Número de capas: {self.num_hidden_layers}")
-        print(f"Learning Rate: {self.lr}")
-        print(f"Número de neuronas por capa: {self.num_neurons_per_hidden}")
+    def debugHyperparams_after_train(self):
+        print(f"\n\n############ Resultados obtenidos tras el entrenamiento final #############")
+        print(f"Número de capas ocultas: {self.num_hidden_layers}")
+        print(f"Número de neuronas por capa oculta: {self.num_hidden_layers}")
         print(f"Función de activación: {self.hidden_activation_function.__name__}")
         print(f"Optimizador: {self.optimizer_name}")
+        print(f"Tasa de aprendizaje: {self.lr}")
+
+    def debugHyperparams_after_evaluate(self):
+        print(f"\n\n############ Resultados obtenidos tras la evaluación #############")
+        print(f"Precisión del modelo tras evaluación: {self.accuracy}")
+        print(f"Pérdida del modelo tras evaluación: {self.loss}")

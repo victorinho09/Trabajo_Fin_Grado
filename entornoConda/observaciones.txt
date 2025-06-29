@@ -1,6 +1,0 @@
-
-Cuando tenga las graficas generadas, mirar si quitar GlobalBatchLog y EpochCumuluta ya que no se usaran las
-callbacks, pero si dejar los ficheros
-
-
-No borrar resultados de graficas_tfg para tener detalles de ejecuciones.
