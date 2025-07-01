@@ -1,4 +1,4 @@
-## Librería de AutoML sobre Keras para la creación automática de modelos enfocados en problemas de clasificación
+## Librería de AutoML sobre Keras para la optimización automática de modelos enfocados en problemas de clasificación
 
 
 ⸻
